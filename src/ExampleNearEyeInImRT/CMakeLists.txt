@@ -11,8 +11,8 @@ source_group ( "Common" FILES ${COMMON_FILES} )
 
 set_target_properties ( ${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin )
 
-#target_include_directories ( ${TARGET_NAME}
-#	PUBLIC ${OpenCV_INCLUDE_DIRS}
-#	)
+target_include_directories ( ${TARGET_NAME}
+	PUBLIC ${OpenCV_INCLUDE_DIRS}
+	)
 
-#target_link_libraries( ${TARGET_NAME} ${OpenCV_LIBS} )
+target_link_libraries( ${TARGET_NAME} ${OpenCV_LIBS} )
