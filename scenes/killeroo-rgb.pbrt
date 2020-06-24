@@ -1,0 +1,72 @@
+LookAt 400 0 0   0 0 0   0 0 1
+
+Camera "perspective" "float fov" [39]
+
+Film "image"  
+"integer xresolution" [700] "integer yresolution" [700]
+    "string filename" "killeroo-simple.exr"
+
+# zoom in by feet
+# "integer xresolution" [1500] "integer yresolution" [1500]
+#	"float cropwindow" [ .34 .49  .67 .8 ]
+
+Sampler "halton" "integer pixelsamples" [ 8 ]
+
+Integrator "whitted"
+#Integrator "path" "integer maxdepth" [ 64 ] "float rrthreshold" 0
+
+
+
+WorldBegin
+
+LightSource "distant" "point from" [400 0 200] "point to" [0 0 0] "rgb L" [3 3 3]
+#LightSource "infinite"
+
+
+
+#AttributeBegin
+#  #Material "matte" "color Kd" [.1 .1 .8]
+#  Material "glass" "float eta" 1.0 "color Kt" [0.8 0.8 1.0]
+#  #Material "translucent" "color Kd" [1 1 0.7] "color transmit" [1 1 1]
+#  Translate 0 0 0
+#Shape "trianglemesh" "point P" [ 0 -200 -150  0 200 -150  0 200 150  0 -200 150 ]
+#	"integer indices" [ 0 1 2 2 3 0]
+#AttributeEnd
+
+
+AttributeBegin
+  Material "matte" "color Kd" [.5 .5 .5]
+  Translate 200 0 -98
+Shape "trianglemesh" "point P" [ -1000 -1000 0  1000 -1000 0  1000 1000 0  -1000 1000 0 ]
+      "float uv" [ 0 0 5 0 5 5 0 5 ]
+	"integer indices" [ 0 1 2 2 3 0]
+Shape "trianglemesh" "point P" [ -400 -1000 -1000   -400 1000 -1000   -400 1000 1000 -400 -1000 1000 ]
+      "float uv" [ 0 0 5 0 5 5 0 5 ]
+        "integer indices" [ 0 1 2 2 3 0]
+AttributeEnd
+
+
+AttributeBegin
+Scale 0.7 0.7 0.7
+
+	Material "plastic" "color Kd" [.9 .1 .1] "color Ks" [.9 .1 .1] "float roughness" [.025]
+	Translate -100 200 0
+	Rotate -60 0 0 1
+	Include "geometry/killeroo.pbrt"
+	Rotate 60 0 0 1
+
+	Material "plastic" "color Kd" [.1 .9 .1] "color Ks" [.1 .9 .1] "float roughness" [.25] 
+	Translate 100 -200 0
+	Rotate -60 0 0 1
+	Include "geometry/killeroo.pbrt"
+	Rotate 60 0 0 1
+
+	Material "plastic" "color Kd" [.1 .1 .9] "color Ks" [.1 .1 .9] "float roughness" [.25] 
+	Translate 100 -200 0
+	Rotate -60 0 0 1
+	Include "geometry/killeroo.pbrt"
+	Rotate 60 0 0 1
+
+AttributeEnd
+
+WorldEnd
