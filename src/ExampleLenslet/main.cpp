@@ -13,8 +13,47 @@
 using namespace lfrt;
 
 
+const std::string groundtrueImageFilepath = "../groundtrue.exr";
 const std::string displayImageFilepath = "../displayimage.exr";
 const std::string simulatedImageFilepath = "../simulated.exr";
+
+
+
+void RenderGroundTrue( const std::string& scene_filepath, const Int width, const Int height )
+{
+
+    std::cout << "Ground-true image render started." << std::endl;
+
+    LFRayTracer* raytracer = LFRayTracerPBRTInstance();
+
+    raytracer->LoadScene( scene_filepath );
+
+    //const Int width = display.ResolutionLCD[0];
+    //const Int height = display.ResolutionLCD[1];
+
+    //DisplayLensletCapture* displayRaygen = new DisplayLensletCapture( &display );
+    //std::shared_ptr<const RayGenerator> raygen( displayRaygen );
+    std::shared_ptr<const RayGenerator> raygen( raytracer->CreateDefaultRayGenerator( width, height ) );
+
+    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
+
+    SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
+    std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+
+    raytracer->Render( *raygen, *sampleGen, *sampleAccum );
+
+    cv::Mat result;
+    sampleAccumCV->SaveToImage( result );
+
+    LFRayTRacerPBRTRelease();
+
+    std::cout << "Ground-true image render ended." << std::endl;
+
+    cv::imwrite( groundtrueImageFilepath, result );
+    cv::namedWindow( "Ground True", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Ground True", result );
+
+}
 
 
 
@@ -106,6 +145,8 @@ int main(int argc, char** argv)
         std::cout << "Display model is not loaded." << std::endl;
         return 1;
     }
+
+    RenderGroundTrue( argv[1], 800, 600 );
 
     RenderDisplayImage( argv[1], display );
 
