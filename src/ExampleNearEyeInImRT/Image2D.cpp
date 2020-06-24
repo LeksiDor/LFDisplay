@@ -5,12 +5,12 @@
 #include <iostream>
 
 #define TINYEXR_IMPLEMENTATION
-#include "../../3dparty/tinyexr.h"
+#include "../../3rdparty/tinyexr.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../../3dparty/stb_image.h"
-#include "../../3dparty/stb_image_write.h"
+#include "../../3rdparty/stb_image.h"
+#include "../../3rdparty/stb_image_write.h"
 
 
 namespace LFOptics
