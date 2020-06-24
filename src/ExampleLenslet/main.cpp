@@ -35,7 +35,7 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
     //std::shared_ptr<const RayGenerator> raygen( displayRaygen );
     std::shared_ptr<const RayGenerator> raygen( raytracer->CreateDefaultRayGenerator( width, height ) );
 
-    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
+    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(1) );
 
     SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
     std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
@@ -45,7 +45,7 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
     cv::Mat result;
     sampleAccumCV->SaveToImage( result );
 
-    LFRayTRacerPBRTRelease();
+    //LFRayTRacerPBRTRelease();
 
     std::cout << "Ground-true image render ended." << std::endl;
 
@@ -81,7 +81,7 @@ void RenderDisplayImage( const std::string& scene_filepath, const DisplayLenslet
     cv::Mat result;
     sampleAccumCV->SaveToImage( result );
 
-    LFRayTRacerPBRTRelease();
+    //LFRayTRacerPBRTRelease();
 
     std::cout << "Display image render ended." << std::endl;
 
@@ -151,6 +151,8 @@ int main(int argc, char** argv)
     RenderDisplayImage( argv[1], display );
 
     RenderSimulation( display );
+
+    LFRayTRacerPBRTRelease();
 
     cv::waitKey(0);
 
