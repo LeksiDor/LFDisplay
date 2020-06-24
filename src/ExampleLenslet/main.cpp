@@ -148,9 +148,9 @@ int main(int argc, char** argv)
 
     RenderGroundTrue( argv[1], 800, 600 );
 
-    RenderDisplayImage( argv[1], display );
+    //RenderDisplayImage( argv[1], display );
 
-    RenderSimulation( display );
+    //RenderSimulation( display );
 
     LFRayTRacerPBRTRelease();
 
