@@ -6,14 +6,6 @@ sizelcd: [ 410., 307.5 ]
 resolutionlcd: [ 1600, 1200 ]
 islensletvertical: 0
 lensletshift: [ 0., 0. ]
-lensletorientation: !!opencv-matrix
-   rows: 2
-   cols: 2
-   dt: d
-   data: [ 2., 0., 0., 2. ]
+lensletorientation: [ 2., 0., 0., 2. ]
 eishift: [ 0., 0. ]
-eiorientation: !!opencv-matrix
-   rows: 2
-   cols: 2
-   dt: d
-   data: [ 2.05, 0., 0., 2.05 ]
+eiorientation: [ 2.05, 0., 0., 2.05 ]

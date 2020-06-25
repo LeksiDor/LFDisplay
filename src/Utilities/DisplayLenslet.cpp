@@ -48,10 +48,10 @@ bool DisplayLenslet::Save( const std::string& filepath ) const
 	fs << "islensletvertical" << this->IsLensletVertical;
 
 	fs << "lensletshift" << this->lensletShift;
-	fs << "lensletorientation" << this->lensletOrientation;
+	fs << "lensletorientation" << cv::Vec<double,4>( this->lensletOrientation.val );
 
 	fs << "eishift" << this->eiShift;
-	fs << "eiorientation" << this->eiOrientation;
+	fs << "eiorientation" << cv::Vec<double,4>( this->eiOrientation.val );
 
 	fs.release();
 	return true;
@@ -71,15 +71,15 @@ bool DisplayLenslet::Load( const std::string& filepath )
 	fs["islensletvertical"] >> this->IsLensletVertical;
 
 	Vec2 shift;
-	Mat22 orientation;
+	cv::Vec<double,4> mat22data;
 
 	fs["lensletshift"] >> shift;
-	fs["lensletorientation"] >> orientation;
-	SetLensletPositioning( shift, orientation );
+	fs["lensletorientation"] >> mat22data;
+	SetLensletPositioning( shift, Mat22(mat22data.val) );
 
 	fs["eishift"] >> shift;
-	fs["eiorientation"] >> orientation;
-	SetEIPositioning( shift, orientation );
+	fs["eiorientation"] >> mat22data;
+	SetEIPositioning( shift, Mat22(mat22data.val) );
 
 	fs.release();
 	return true;
