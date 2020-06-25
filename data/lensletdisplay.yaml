@@ -1,11 +1,11 @@
 %YAML:1.0
 ---
-lenslettolcd: 10.
-lenslettoorigin: 400.
-sizelcd: [ 410., 307.5 ]
-resolutionlcd: [ 1600, 1200 ]
+lenslettolcd: 6.32
+lenslettoorigin: 20.
+sizelcd: [ 21.6, 21.6 ]
+resolutionlcd: [ 2160, 2160 ]
 islensletvertical: 0
 lensletshift: [ 0., 0. ]
-lensletorientation: [ 2., 0., 0., 2. ]
+lensletorientation: [ 1.2, 0., 0., 1.2 ]
 eishift: [ 0., 0. ]
-eiorientation: [ 2.05, 0., 0., 2.05 ]
+eiorientation: [ 1.58, 0., 0., 1.58 ]
