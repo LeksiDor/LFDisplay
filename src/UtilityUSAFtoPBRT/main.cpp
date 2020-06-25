@@ -112,10 +112,10 @@ bool SaveAsPBRTScene( const std::string& filepath )
 		stream << "Material \"matte\" \"color Kd\" [1.0 1.0 1.0] Shape \"trianglemesh\" " << std::endl;
 		stream << "\"point P\" [";
 		stream
-			<< -epsilon_shift << " " << bounds.minx << " " << bounds.miny << " "
-			<< -epsilon_shift << " " << bounds.maxx << " " << bounds.miny << " "
-			<< -epsilon_shift << " " << bounds.maxx << " " << bounds.maxy << " "
-			<< -epsilon_shift << " " << bounds.minx << " " << bounds.maxy << " ";
+			<< bounds.minx << " " << bounds.miny << " " << epsilon_shift << " "
+			<< bounds.maxx << " " << bounds.miny << " " << epsilon_shift << " "
+			<< bounds.maxx << " " << bounds.maxy << " " << epsilon_shift << " "
+			<< bounds.minx << " " << bounds.maxy << " " << epsilon_shift << " ";
 		stream << "]" << std::endl;
 		stream << "\"integer indices\" [";
 		stream << 0 << " " << 1 << " " << 2 << " " << 2 << " " << 3 << " " << 0 << " ";
@@ -130,10 +130,10 @@ bool SaveAsPBRTScene( const std::string& filepath )
 		{
 			const Rectangle& rect = rectangles[i];
 			stream
-				<< 0 << " " << rect.minx << " " << rect.miny << " "
-				<< 0 << " " << rect.maxx << " " << rect.miny << " "
-				<< 0 << " " << rect.maxx << " " << rect.maxy << " "
-				<< 0 << " " << rect.minx << " " << rect.maxy << " ";
+				<< rect.minx << " " << rect.miny << " " << 0 << " "
+				<< rect.maxx << " " << rect.miny << " " << 0 << " "
+				<< rect.maxx << " " << rect.maxy << " " << 0 << " "
+				<< rect.minx << " " << rect.maxy << " " << 0 << " ";
 		}
 		stream << "]" << std::endl;
 		stream << "\"integer indices\" [";

@@ -1,6 +1,6 @@
-LookAt 400 0 0   0 0 0   0 0 1
+LookAt 0 0 -400   0 0 0   0 1 0
 
-Camera "perspective" "float fov" [39]
+Camera "perspective" "float fov" [33.333333]
 
 Film "image"  
 "integer xresolution" [700] "integer yresolution" [700]
@@ -19,7 +19,7 @@ Integrator "whitted"
 
 WorldBegin
 
-LightSource "distant" "point from" [100 0 0] "point to" [0 0 0] "rgb L" [3 3 3]
+LightSource "distant" "point from" [0 0 -100] "point to" [0 0 0] "rgb L" [3 3 3]
 #LightSource "infinite"
 
 
@@ -28,7 +28,7 @@ AttributeBegin
   #Material "matte" "color Kd" [.5 .5 .5]
   Material "matte" "color Kd" [.2 .7 .8]
   Translate 200 0 -98
-Shape "trianglemesh" "point P" [ -400 -1000 -1000   -400 1000 -1000   -400 1000 1000 -400 -1000 1000 ]
+Shape "trianglemesh" "point P" [ -1000 -1000 1000   1000 -1000 1000   1000 1000 1000 -1000 1000 1000 ]
       "float uv" [ 0 0 5 0 5 5 0 5 ]
         "integer indices" [ 0 1 2 2 3 0]
 AttributeEnd
@@ -37,30 +37,30 @@ AttributeEnd
 
 
 AttributeBegin
-#Scale 100.0 100.0 100.0
-#Scale 10.0 10.0 10.0
-#Scale 2.0 2.0 2.0
 Scale 1.0 1.0 1.0
 
-	Translate -100 200 0
+	# Nearest plane
+	Translate -45 -45 -100
 	#Rotate -60 0 0 1
-	Scale 100.0 100.0 100.0
+	Scale 45.0 45.0 45.0
 	Include "geometry/rectangle.pbrt"
-	Scale 0.01 0.01 0.01
+	Scale 0.022222222222222 0.022222222222222 0.022222222222222
 	#Rotate 60 0 0 1
 
-	Translate 0 -200 0
+	# Middle plane
+	Translate 45 45 100
 	#Rotate -60 0 0 1
-	Scale 100.0 100.0 100.0
+	Scale 60.0 60.0 60.0
 	Include "geometry/rectangle.pbrt"
-	Scale 0.01 0.01 0.01
+	Scale 0.016666666666666 0.016666666666666 0.016666666666666
 	#Rotate 60 0 0 1
 
-	Translate 100 -200 0
+	# Furthest plane
+	Translate 90 90 200
 	#Rotate -60 0 0 1
-	Scale 100.0 100.0 100.0
+	Scale 90.0 90.0 90.0
 	Include "geometry/rectangle.pbrt"
-	Scale 0.01 0.01 0.01
+	Scale 0.011111111111111 0.011111111111111 0.011111111111111
 	#Rotate 60 0 0 1
 
 AttributeEnd
