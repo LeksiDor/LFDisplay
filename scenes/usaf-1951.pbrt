@@ -19,13 +19,11 @@ Integrator "whitted"
 
 WorldBegin
 
-LightSource "distant" "point from" [0 0 -100] "point to" [0 0 0] "rgb L" [3 3 3]
-#LightSource "infinite"
+LightSource "distant" "point from" [0 0 -100] "point to" [0 0 0] "rgb L" [3.1415 3.1415 3.1415]
 
 
 
 AttributeBegin
-  #Material "matte" "color Kd" [.5 .5 .5]
   Material "matte" "color Kd" [.2 .7 .8]
   Translate 200 0 -98
 Shape "trianglemesh" "point P" [ -1000 -1000 1000   1000 -1000 1000   1000 1000 1000 -1000 1000 1000 ]
