@@ -18,6 +18,9 @@ const std::string displayImageFilepath = "../displayimage.exr";
 const std::string simulatedImageFilepath = "../simulated.exr";
 
 
+const Int width = 512;
+const Int height = 512;
+
 
 void RenderGroundTrue( const std::string& scene_filepath, const Int width, const Int height )
 {
@@ -28,14 +31,11 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
 
     raytracer->LoadScene( scene_filepath );
 
-    //const Int width = display.ResolutionLCD[0];
-    //const Int height = display.ResolutionLCD[1];
-
     //DisplayLensletCapture* displayRaygen = new DisplayLensletCapture( &display );
     //std::shared_ptr<const RayGenerator> raygen( displayRaygen );
     std::shared_ptr<const RayGenerator> raygen( raytracer->CreateDefaultRayGenerator( width, height ) );
 
-    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(1) );
+    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
 
     SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
     std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
@@ -86,8 +86,8 @@ void RenderDisplayImage( const std::string& scene_filepath, const DisplayLenslet
     std::cout << "Display image render ended." << std::endl;
 
     cv::imwrite( displayImageFilepath, result );
-    cv::namedWindow( "Simulated", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Simulated", result );
+    cv::namedWindow( "Display Image", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Display Image", result );
 }
 
 
@@ -98,11 +98,6 @@ void RenderSimulation( const DisplayLenslet& display )
 
     const Int numLensletsX = std::round( display.SizeLCD[0] / display.LensletOrientation()(0,0) );
     const Int numLensletsY = std::round( display.SizeLCD[1] / display.LensletOrientation()(1,1) );
-
-    //const Int width  = display.ResolutionLCD[0] / 2;
-    //const Int height = display.ResolutionLCD[1] / 2;
-    const Int width  = 3 * numLensletsX;
-    const Int height = 3 * numLensletsY;
 
     DisplayLensletShow renderer( &display );
     renderer.LoadScene( displayImageFilepath );
@@ -119,8 +114,8 @@ void RenderSimulation( const DisplayLenslet& display )
     std::cout << "Display simulation ended." << std::endl;
 
     cv::imwrite( simulatedImageFilepath, result );
-    cv::namedWindow( "Display Image", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Display Image", result );
+    cv::namedWindow( "Simulation", cv::WINDOW_AUTOSIZE );
+    cv::imshow( "Simulation", result );
 }
 
 
@@ -146,11 +141,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    RenderGroundTrue( argv[1], 800, 600 );
+    RenderGroundTrue( argv[1], width, height );
 
-    //RenderDisplayImage( argv[1], display );
+    RenderDisplayImage( argv[1], display );
 
-    //RenderSimulation( display );
+    RenderSimulation( display );
 
     LFRayTRacerPBRTRelease();
 
