@@ -34,6 +34,8 @@ public:
 	bool Save( const std::string& filepath ) const;
 	bool Load( const std::string& filepath );
 
+	void FillProjectorsPositions( std::vector<Vec3>& positions ) const;
+
 public:
 	Real ViewerDistance = Real(1); // Physical distance from viewer to the screen center.
 	Vec2i ProjectorResolution = Vec2i(1,1); // Resolution of each individual projector.

@@ -69,3 +69,25 @@ bool DisplayProjectorAligned::Load( const std::string& filepath )
 	fs.release();
 	return true;
 }
+
+
+void DisplayProjectorAligned::FillProjectorsPositions( std::vector<Vec3>& positions ) const
+{
+	positions.clear();
+	const Int numLines = ProjectorLines.size();
+	Int numProjectorsTotal = 0;
+	for ( Int i = 0; i < numLines; ++i )
+		numProjectorsTotal += ProjectorLines[i].number;
+
+	positions.resize( numProjectorsTotal );
+	Int globalProjectorInd = 0;
+	for ( Int lineInd = 0; lineInd < numLines; ++lineInd )
+	{
+		const ProjectorLine& line = ProjectorLines[lineInd];
+		for ( Int i = 0; i < line.number; ++i )
+		{
+			const Vec3 position = line.start + Real(i) * line.step;
+			positions[globalProjectorInd++] = position;
+		}
+	}
+}
