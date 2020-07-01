@@ -18,6 +18,6 @@ set ( CMAKE_CXX_STANDARD 17 )
 
 add_definitions ( -D _USE_MATH_DEFINES )
 
-add_subdirectory( src/ExampleLenslet )
+add_subdirectory( src/ExampleNearEyeInImRT )
 add_subdirectory( src/Utilities )
 add_subdirectory( src/UtilityUSAFtoPBRT )
