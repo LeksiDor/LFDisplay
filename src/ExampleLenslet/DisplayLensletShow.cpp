@@ -173,7 +173,7 @@ bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::S
 							}
 
 							const Real lcdLambdaX = 0.5 + lcdPosX / lcdSizeX;
-							const Real lcdLambdaY = 0.5 + lcdPosY / lcdSizeY;
+							const Real lcdLambdaY = 0.5 - lcdPosY / lcdSizeY;
 
 							const Real lcdPixelX = lcdLambdaX * lcdresX;
 							const Real lcdPixelY = lcdLambdaY * lcdresY;
