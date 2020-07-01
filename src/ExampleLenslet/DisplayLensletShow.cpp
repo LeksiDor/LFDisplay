@@ -84,8 +84,9 @@ bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::S
 	const Int numTilesX = (globSizeX + tileSize - 1) / tileSize;
 	const Int numTilesY = (globSizeY + tileSize - 1) / tileSize;
 
-	const Real f = DisplayModel->LensletToOrigin;
-	const Real d = DisplayModel->LensletToLCD;
+	const Real distLensletToOrigin = DisplayModel->LensletToOrigin;
+	const Real distLensletToLCD = DisplayModel->LensletToLCD;
+	const Real focalLength = DisplayModel->LensletFocalLength;
 
 	const bool isLensletVertical = DisplayModel->IsLensletVertical;
 	const Vec2& lensletShift = DisplayModel->LensletShift();
@@ -139,19 +140,22 @@ bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::S
 							if ( dir.z <= 0 )
 								continue;
 
+							// Compute 2D direction in terms of tangent values.
 							const Real dirTanX = dir.x / dir.z;
 							const Real dirTanY = dir.y / dir.z;
 
+							// Find intersection of ray with plane z=0.
 							const Real viewerX = ori.x - dirTanX * ori.z;
 							const Real viewerY = ori.y - dirTanY * ori.z;
 
-							const Real lensletX = ori.x + dirTanX * ( f - ori.z );
-							const Real lensletY = ori.y + dirTanY * ( f - ori.z );
+							// Find intersection of ray with lenslet plane.
+							const Real lensletX = ori.x + dirTanX * ( distLensletToOrigin - ori.z );
+							const Real lensletY = ori.y + dirTanY * ( distLensletToOrigin - ori.z );
 
+							// Find lenslet index and lenslet center.
 							const Vec2 lensletIndReal = lensletShiftInv + lensletOrientationInv * Vec2(lensletX,lensletY);
 							const Int lensletIndX = std::round( lensletIndReal[0] );
 							const Int lensletIndY = std::round( lensletIndReal[1] );
-
 							const Vec2 lensletCenter = lensletShift + lensletOrientation * Vec2(lensletIndX,lensletIndY);
 
 							Real lcdPosX;
@@ -163,8 +167,11 @@ bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::S
 							}
 							else
 							{
-								lcdPosX = viewerX + (f+d)/d*( lensletCenter[0] - viewerX );
-								lcdPosY = viewerY + (f+d)/d*( lensletCenter[1] - viewerY );
+								// ToDo: consider tilted lens.
+								const Real lcdDirTanX = dirTanX - (lensletX - lensletCenter[0]) / focalLength;
+								const Real lcdDirTanY = dirTanY - (lensletY - lensletCenter[1]) / focalLength;
+								lcdPosX = lensletX + lcdDirTanX * distLensletToLCD;
+								lcdPosY = lensletY + lcdDirTanY * distLensletToLCD;
 							}
 
 							const Real lcdLambdaX = 0.5 + lcdPosX / lcdSizeX;
