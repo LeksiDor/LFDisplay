@@ -111,9 +111,6 @@ void RenderSimulation()
     SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
     std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
 
-    //cv::Mat result;
-    //renderer.Render( *raygen, *sampler, result, width, height );
-
     renderer.Render( *raygen, *sampler, *sampleAccum );
 
     cv::Mat result;
