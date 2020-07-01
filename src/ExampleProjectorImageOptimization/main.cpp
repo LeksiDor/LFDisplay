@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "DisplayProjectorAligned.h"
+
 
 int main( int argc, char** argv )
 {
@@ -15,6 +17,14 @@ int main( int argc, char** argv )
     }
 
     std::cout << "Scene model: " << argv[1] << std::endl;
+
+
+    DisplayProjectorAligned display;
+    if ( !display.Load( "../../data/display-projectors-aligned.yaml" ) )
+    {
+        std::cout << "Cannot load display model." << std::endl;
+        return 1;
+    }
 
     return 0;
 }

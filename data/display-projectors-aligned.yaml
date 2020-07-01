@@ -1,0 +1,9 @@
+%YAML:1.0
+---
+viewerdistance: 400.
+resolution: [ 800, 600 ]
+halfphyssize: [ 200., 150. ]
+diffusionpower: [ 40., 0. ]
+diffusertype: conical
+projectorlines:
+   - { start:[ -1000., 0., 800. ], step:[ 50., 0., 0. ], number:41 }
