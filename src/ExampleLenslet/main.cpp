@@ -6,13 +6,20 @@
 #include "DisplayLensletCapture.h"
 #include "DisplayLensletShow.h"
 
+#include "Image.h"
+#include "ImageAnalysis.h"
 #include "SampleAccumCV.h"
 #include "SampleGenUniform.h"
 
-
 #include "RayGenPinhole.h"
 
+
 using namespace lfrt;
+
+
+// ToDo: Realistic camera model (eye that can focus).
+// ToDo: Metrics consistent with published results.
+// ToDo: Test all cases.
 
 
 const std::string groundtrueImageFilepath = "../groundtrue.exr";
@@ -95,7 +102,6 @@ void RenderDisplayImage( const std::string& scene_filepath )
 }
 
 
-
 void RenderSimulation()
 {
     std::cout << "Display simulation started." << std::endl;
@@ -121,6 +127,23 @@ void RenderSimulation()
     cv::imwrite( simulatedImageFilepath, result );
     cv::namedWindow( "Simulation", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Simulation", result );
+}
+
+
+
+void CompareImages()
+{
+    cv::Mat groundtrue;
+    cv::Mat simulated;
+
+    LoadImageRGB( groundtrueImageFilepath, groundtrue );
+    LoadImageRGB( simulatedImageFilepath, simulated );
+
+    const double psnr = ImagePSNR( simulated, groundtrue );
+    std::cout << "PSNR: " << psnr << std::endl;
+
+    const cv::Scalar ssim = ImageMSSIM( simulated, groundtrue );
+    std::cout << "SSIM: " << ssim[0] << " " << ssim[1] << " " << ssim[2] << std::endl;
 }
 
 
@@ -152,6 +175,8 @@ int main(int argc, char** argv)
     RenderSimulation();
 
     LFRayTRacerPBRTRelease();
+
+    CompareImages();
 
     cv::waitKey(0);
 
