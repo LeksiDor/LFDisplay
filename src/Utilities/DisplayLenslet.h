@@ -37,6 +37,7 @@ public:
 public:
 	Real LensletToLCD; // Distance from lenslet surface to LCD.
 	Real LensletToOrigin; // Distance from origin to lenslet surface.
+	Real LensletFocalLength; // Focal length of each microlens.
 
 	Vec2 SizeLCD; // Physical size of the LCD.
 	Vec2i ResolutionLCD; // Resolution of the LCD in pixels.

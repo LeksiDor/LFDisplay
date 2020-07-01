@@ -49,6 +49,7 @@ bool DisplayLenslet::Save( const std::string& filepath ) const
 
 	fs << "lensletshift" << this->lensletShift;
 	fs << "lensletorientation" << cv::Vec<double,4>( this->lensletOrientation.val );
+	fs << "lensletfocallength" << LensletFocalLength;
 
 	fs << "eishift" << this->eiShift;
 	fs << "eiorientation" << cv::Vec<double,4>( this->eiOrientation.val );
@@ -76,6 +77,7 @@ bool DisplayLenslet::Load( const std::string& filepath )
 	fs["lensletshift"] >> shift;
 	fs["lensletorientation"] >> mat22data;
 	SetLensletPositioning( shift, Mat22(mat22data.val) );
+	fs["lensletfocallength"] >> this->LensletFocalLength;
 
 	fs["eishift"] >> shift;
 	fs["eiorientation"] >> mat22data;

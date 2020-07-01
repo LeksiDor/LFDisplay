@@ -7,5 +7,6 @@ resolutionlcd: [ 2160, 2160 ]
 islensletvertical: 0
 lensletshift: [ 0., 0. ]
 lensletorientation: [ 1.2, 0., 0., 1.2 ]
+lensletfocallength: 6.427
 eishift: [ 0., 0. ]
 eiorientation: [ 1.58, 0., 0., 1.58 ]
