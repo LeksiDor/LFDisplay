@@ -13,9 +13,18 @@ public:
     using VEC2 = lfrt::VEC2;
     using VEC3 = lfrt::VEC3;
 
+    enum class Sampling
+    {
+        LensletCenter = 0,
+        PupilCenter = 1,
+        LensletAverage = 2,
+    };
+
 public:
 
-    DisplayLensletCapture( const DisplayLenslet* model = nullptr );
+    DisplayLensletCapture(
+        const DisplayLenslet* model = nullptr,
+        const Sampling& sampling = Sampling::LensletCenter );
 
     virtual ~DisplayLensletCapture() = default;
 
@@ -28,6 +37,7 @@ public:
 
 public:
     const DisplayLenslet* DisplayModel = nullptr;
+    Sampling SamplingType = Sampling::LensletCenter;
 };
 
 
