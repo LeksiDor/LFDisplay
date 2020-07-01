@@ -10,6 +10,8 @@
 #include "SampleGenUniform.h"
 
 
+#include "RayGenPinhole.h"
+
 using namespace lfrt;
 
 
@@ -17,12 +19,20 @@ const std::string groundtrueImageFilepath = "../groundtrue.exr";
 const std::string displayImageFilepath = "../displayimage.exr";
 const std::string simulatedImageFilepath = "../simulated.exr";
 
-
+// Width and height of the images to compare.
 const Int width = 512;
 const Int height = 512;
 
+// This determines camera FoV.
+const Real sceneCornerX = 90;
+const Real sceneCornerY = 90;
+const Real sceneDistance = 300;
 
-void RenderGroundTrue( const std::string& scene_filepath, const Int width, const Int height )
+// Display model itself.
+DisplayLenslet display;
+
+
+void RenderGroundTrue( const std::string& scene_filepath )
 {
 
     std::cout << "Ground-true image render started." << std::endl;
@@ -31,9 +41,7 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
 
     raytracer->LoadScene( scene_filepath );
 
-    //DisplayLensletCapture* displayRaygen = new DisplayLensletCapture( &display );
-    //std::shared_ptr<const RayGenerator> raygen( displayRaygen );
-    std::shared_ptr<const RayGenerator> raygen( raytracer->CreateDefaultRayGenerator( width, height ) );
+    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, {sceneCornerX,sceneCornerY}, sceneDistance ) );
 
     std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
 
@@ -45,8 +53,6 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
     cv::Mat result;
     sampleAccumCV->SaveToImage( result );
 
-    //LFRayTRacerPBRTRelease();
-
     std::cout << "Ground-true image render ended." << std::endl;
 
     cv::imwrite( groundtrueImageFilepath, result );
@@ -57,7 +63,7 @@ void RenderGroundTrue( const std::string& scene_filepath, const Int width, const
 
 
 
-void RenderDisplayImage( const std::string& scene_filepath, const DisplayLenslet& display )
+void RenderDisplayImage( const std::string& scene_filepath )
 {
     std::cout << "Display image render started." << std::endl;
 
@@ -81,8 +87,6 @@ void RenderDisplayImage( const std::string& scene_filepath, const DisplayLenslet
     cv::Mat result;
     sampleAccumCV->SaveToImage( result );
 
-    //LFRayTRacerPBRTRelease();
-
     std::cout << "Display image render ended." << std::endl;
 
     cv::imwrite( displayImageFilepath, result );
@@ -92,7 +96,7 @@ void RenderDisplayImage( const std::string& scene_filepath, const DisplayLenslet
 
 
 
-void RenderSimulation( const DisplayLenslet& display )
+void RenderSimulation()
 {
     std::cout << "Display simulation started." << std::endl;
 
@@ -101,15 +105,19 @@ void RenderSimulation( const DisplayLenslet& display )
 
     DisplayLensletShow renderer( &display );
     renderer.LoadScene( displayImageFilepath );
-    std::shared_ptr<const RayGenerator> raygen( renderer.CreateDefaultRayGenerator( width, height ) );
-    //std::shared_ptr<SampleGenerator> sampler( renderer.CreateDefaultSampleGenerator( width, height ) );
-    std::shared_ptr<SampleGenerator> sampler( new SampleGenUniform(5) );
-    //SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
-    //std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, {sceneCornerX,sceneCornerY}, sceneDistance ) );
+    std::shared_ptr<SampleGenerator> sampler( new SampleGenUniform(3) );
+
+    SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
+    std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+
+    //cv::Mat result;
+    //renderer.Render( *raygen, *sampler, result, width, height );
+
+    renderer.Render( *raygen, *sampler, *sampleAccum );
+
     cv::Mat result;
-    //renderer.Render( *raygen, *sampler, *sampleAccum );
-    renderer.Render( *raygen, *sampler, result, width, height );
-    //sampleAccumCV->SaveToImage( result );
+    sampleAccumCV->SaveToImage( result );
 
     std::cout << "Display simulation ended." << std::endl;
 
@@ -133,7 +141,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-	DisplayLenslet display;
 	const bool isDisplayLoaded = display.Load( "../../data/lensletdisplay.yaml" );
     if ( !isDisplayLoaded )
     {
@@ -141,11 +148,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    RenderGroundTrue( argv[1], width, height );
+    RenderGroundTrue( argv[1] );
 
-    RenderDisplayImage( argv[1], display );
+    RenderDisplayImage( argv[1] );
 
-    RenderSimulation( display );
+    RenderSimulation();
 
     LFRayTRacerPBRTRelease();
 

@@ -37,12 +37,7 @@ public:
 	// Returns OpenCV-based sample accum.
 	virtual lfrt::SampleAccumulator* CreateDefaultSampleAccumulator( const Int& width, const Int& height ) const override;
 
-
 	virtual bool Render( const lfrt::RayGenerator& raygen, const lfrt::SampleGenerator& sampleGen, lfrt::SampleAccumulator& sampleAccum ) const override;
-
-
-	bool Render( const lfrt::RayGenerator& raygen, lfrt::SampleGenerator& sampleGen, cv::Mat& result, const Int width, const Int height ) const;
-
 
 public:
 	const DisplayLenslet* DisplayModel = nullptr;
