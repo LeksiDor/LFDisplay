@@ -72,7 +72,7 @@ Real RayGenPinhole::GenerateRay(
     const Real posZ = ImagePlaneDepth;
 
     ori = { OriginX, OriginY, 0 };
-    dir = { posX, posY, posZ };
+    dir = { posX - OriginX, posY - OriginY, posZ };
 
     return 1.0;
 }
