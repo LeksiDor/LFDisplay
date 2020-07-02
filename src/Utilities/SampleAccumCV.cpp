@@ -64,6 +64,10 @@ bool SampleAccumCV::MergeSampleTile( SampleTile* tile )
     {
         for ( Int localY = 0; localY < filmTile->height; ++localY )
         {
+            const Int x = startX + localX;
+            const Int y = startY + localY;
+            if (x >= weighted.cols || y >= weighted.rows)
+                continue;
             weighted.at<RGB>( startY+localY, startX+localX ) = filmTile->weighted.at<RGB>( localY, localX );
             weights.at<Gray>( startY+localY, startX+localX ) = filmTile->weights.at<Gray>( localY, localX );
             unweighted.at<RGB>( startY+localY, startX+localX ) = filmTile->unweighted.at<RGB>( localY, localX );

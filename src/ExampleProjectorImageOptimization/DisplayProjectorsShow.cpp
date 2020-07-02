@@ -26,7 +26,7 @@ bool DisplayProjectorsShow::LoadScene( const std::string& filepath )
 	if (DisplayModel == nullptr)
 		return false;
 	DisplayModel->FillProjectorsPositions(ProjectorPositions);
-	const Int numProjectorsTotal = ProjectorImages.size();
+	const Int numProjectorsTotal = ProjectorPositions.size();
 	ProjectorImages.resize(numProjectorsTotal);
 	bool success = true;
 	for (int i = 0; i < numProjectorsTotal; ++i)
@@ -158,6 +158,10 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 					{
 						const Int x = tileStartX + xLoc;
 						const Int y = tileStartY + yLoc;
+
+						if ( x >= width || y >= height )
+							continue;
+
 						sampler->ResetPixel( x, y );
 
 						do
