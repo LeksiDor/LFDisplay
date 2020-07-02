@@ -69,11 +69,28 @@ int main( int argc, char** argv )
     height = display.ProjectorResolution[1];
     display.FillProjectorsPositions( projectorPositions );
 
-    std::system( "mkdir ProjectorImages" );
-    for ( Int i = 0; i < projectorPositions.size(); ++i )
+
+    std::cout << std::endl;
+    std::cout << "Initializing basic parameters complete." << std::endl;
+    std::cout << "What would you like to do?" << std::endl;
+    std::cout << "1 - generate projector images" << std::endl << std::endl;
+
+    Int choice = -1;
+    std::cin >> choice;
+
+    switch ( choice )
     {
-        const std::string image_filepath = (ss() << "ProjectorImages" << "/" << std::setfill('0') << std::setw(4) << i << ".exr").str();
-        RenderProjectorImage( projectorPositions[i], argv[1], image_filepath );
+    case 1: {
+        std::system( "mkdir ProjectorImages" );
+        for ( Int i = 0; i < projectorPositions.size(); ++i )
+        {
+            const std::string image_filepath = (ss() << "ProjectorImages" << "/" << std::setfill('0') << std::setw(4) << i << ".exr").str();
+            RenderProjectorImage( projectorPositions[i], argv[1], image_filepath );
+        }
+        } break;
+    default:
+        std::cout << "Your choice is wrong!!! Terminate!" << std::endl;
+        break;
     }
 
     LFRayTRacerPBRTRelease();
