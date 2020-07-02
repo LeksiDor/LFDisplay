@@ -8,16 +8,16 @@
 
 class DisplayProjectorAligned;
 
-class DisplayLensletShow
+class DisplayProjectorsShow
 	: public lfrt::LFRayTracer
 {
 public:
 
 	using Color = cv::Vec3f;
 
-	DisplayLensletShow( const DisplayProjectorAligned* displayModel = nullptr );
+	DisplayProjectorsShow( const DisplayProjectorAligned* displayModel = nullptr );
 
-	virtual ~DisplayLensletShow() = default;
+	virtual ~DisplayProjectorsShow() = default;
 
 	// Filepath is location of the folder with projector images.
 	// Image names must be formatted as "xxxx.exr".

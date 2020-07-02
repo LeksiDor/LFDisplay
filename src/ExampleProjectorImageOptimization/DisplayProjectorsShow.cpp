@@ -15,13 +15,13 @@ using ss = std::stringstream;
 
 
 
-DisplayLensletShow::DisplayLensletShow( const DisplayProjectorAligned* displayModel )
+DisplayProjectorsShow::DisplayProjectorsShow( const DisplayProjectorAligned* displayModel )
 	:DisplayModel(displayModel)
 {
 }
 
 
-bool DisplayLensletShow::LoadScene( const std::string& filepath )
+bool DisplayProjectorsShow::LoadScene( const std::string& filepath )
 {
 	if (DisplayModel == nullptr)
 		return false;
@@ -38,7 +38,7 @@ bool DisplayLensletShow::LoadScene( const std::string& filepath )
 }
 
 
-lfrt::RayGenerator* DisplayLensletShow::CreateDefaultRayGenerator( const Int& width, const Int& height ) const
+lfrt::RayGenerator* DisplayProjectorsShow::CreateDefaultRayGenerator( const Int& width, const Int& height ) const
 {
 	if ( DisplayModel == nullptr )
 	{
@@ -53,19 +53,19 @@ lfrt::RayGenerator* DisplayLensletShow::CreateDefaultRayGenerator( const Int& wi
 }
 
 
-lfrt::SampleGenerator* DisplayLensletShow::CreateDefaultSampleGenerator( const Int& width, const Int& height ) const
+lfrt::SampleGenerator* DisplayProjectorsShow::CreateDefaultSampleGenerator( const Int& width, const Int& height ) const
 {
 	return new SampleGenUniform(3);
 }
 
 
-lfrt::SampleAccumulator* DisplayLensletShow::CreateDefaultSampleAccumulator( const Int& width, const Int& height ) const
+lfrt::SampleAccumulator* DisplayProjectorsShow::CreateDefaultSampleAccumulator( const Int& width, const Int& height ) const
 {
 	return new SampleAccumCV( width, height );
 }
 
 
-bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::SampleGenerator& sampleGen, lfrt::SampleAccumulator& sampleAccum ) const
+bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt::SampleGenerator& sampleGen, lfrt::SampleAccumulator& sampleAccum ) const
 {
 	// ToDo: display with front-projectors.
 
@@ -247,25 +247,25 @@ bool DisplayLensletShow::Render( const lfrt::RayGenerator& raygen, const lfrt::S
 }
 
 
-Real DisplayLensletShow::RhoConical( const Real& dx, const Real& dy, const Real& dz )
+Real DisplayProjectorsShow::RhoConical( const Real& dx, const Real& dy, const Real& dz )
 {
 	return dx / std::sqrt(dy*dy + dz*dz);
 }
 
 
-Real DisplayLensletShow::EtaConical(const Real& dx, const Real& dy, const Real& dz)
+Real DisplayProjectorsShow::EtaConical(const Real& dx, const Real& dy, const Real& dz)
 {
 	return dy / dz;
 }
 
 
-Real DisplayLensletShow::RhoLinear(const Real& dx, const Real& dy, const Real& dz)
+Real DisplayProjectorsShow::RhoLinear(const Real& dx, const Real& dy, const Real& dz)
 {
 	return dx / dz;
 }
 
 
-Real DisplayLensletShow::EtaLinear(const Real& dx, const Real& dy, const Real& dz)
+Real DisplayProjectorsShow::EtaLinear(const Real& dx, const Real& dy, const Real& dz)
 {
 	return dy / dz;
 }
