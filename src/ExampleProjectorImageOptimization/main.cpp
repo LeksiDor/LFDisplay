@@ -12,6 +12,7 @@
 #include "DisplayProjectorsShow.h"
 
 #include "RayGenPinhole.h"
+#include "ObserverSpace.h"
 
 
 DisplayProjectorAligned display;
@@ -20,9 +21,9 @@ Int width = 0;
 Int height = 0;
 
 
-const Vec3 viewerStart = Vec3( -500, 0, 0 );
-const Vec3 viewerStep = Vec3( 10, 0, 0 );
-const Int numViewers = 101;
+const ObserverSpace observerSpace( { Vec3(-500,0,0), Vec3(10,0,0), 101 } );
+
+const Int numIterations = 100;
 
 
 using namespace lfrt;
@@ -102,6 +103,7 @@ int main( int argc, char** argv )
     std::cout << "1 - generate ground-true images" << std::endl;
     std::cout << "2 - generate projector images" << std::endl;
     std::cout << "3 - generate perceived images (requires step 2)" << std::endl;
+    std::cout << "4 - generate iterative projector-perceived images (requires step 2)" << std::endl;
 
     Int choice = -1;
     std::cin >> choice;
@@ -111,9 +113,9 @@ int main( int argc, char** argv )
     case 1: {
         std::system( "mkdir GroundTrueImages" );
         LFRayTracer* raytracer = LFRayTracerPBRTInstance();
-        for ( Int viewInd = 0; viewInd < numViewers; ++viewInd )
+        for ( Int viewInd = 0; viewInd < observerSpace.NumPositions(); ++viewInd )
         {
-            const Vec3 viewerPos = viewerStart + Real(viewInd) * viewerStep;
+            const Vec3 viewerPos = observerSpace.Position( viewInd );
             const std::string image_filepath = (ss() << "GroundTrueImages" << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
             raytracer->LoadScene( argv[1] );
             RenderPerceivedImage( viewerPos[0], viewerPos[1], *raytracer, image_filepath );
@@ -135,12 +137,15 @@ int main( int argc, char** argv )
             std::cout << "Could not load projector images! Terminate!" << std::endl;
             return 1;
         }
-        for ( Int viewInd = 0; viewInd < numViewers; ++viewInd )
+        for ( Int viewInd = 0; viewInd < observerSpace.NumPositions(); ++viewInd )
         {
-            const Vec3 viewerPos = viewerStart + Real(viewInd) * viewerStep;
+            const Vec3 viewerPos = observerSpace.Position( viewInd );
             const std::string image_filepath = (ss() << "PerceivedImages_0000" << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
             RenderPerceivedImage( viewerPos[0], viewerPos[1], show, image_filepath );
         }
+        } break;
+    case 4: {
+
         } break;
     default:
         std::cout << "Your choice is wrong!!! Terminate!" << std::endl;
