@@ -18,10 +18,26 @@ public:
 
 	RayGenPinhole() = default;
 
+	RayGenPinhole( const Int& width, const Int& height );
+
 	RayGenPinhole(
 		const Int& width, const Int& height,
-		const VEC2& imagePlaneHalfSize = {1.0,1.0},
-		const Real& imagePlaneDepth = 1.0 );
+		const Real& imagePlaneHalfSizeX,
+		const Real& imagePlaneHalfSizeY,
+		const Real& imagePlaneDepth );
+
+	RayGenPinhole(
+		const Int& width, const Int& height,
+		const Real& minX, const Real& minY,
+		const Real& maxX, const Real& maxY,
+		const Real& imagePlaneDepth );
+
+	RayGenPinhole(
+		const Int& width, const Int& height,
+		const Real& minX, const Real& minY,
+		const Real& maxX, const Real& maxY,
+		const Real& imagePlaneDepth,
+		const Real& originX, const Real& originY );
 
 	virtual ~RayGenPinhole() = default;
 
@@ -30,10 +46,14 @@ public:
 		VEC3& ori, VEC3& dir ) const override;
 
 	Real ImagePlaneDepth = 1.0;
-	VEC2 ImagePlaneHalfSize = { 1.0, 1.0 };
+	Real MinX = -1.0;
+	Real MinY = -1.0;
+	Real MaxX = 1.0;
+	Real MaxY = 1.0;
 	Int Width = 512;
 	Int Height = 512;
-	VEC2 OriginXY = { 0, 0 };
+	Real OriginX = 0;
+	Real OriginY = 0;
 };
 
 

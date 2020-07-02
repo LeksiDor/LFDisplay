@@ -48,7 +48,7 @@ void RenderGroundTrue( const std::string& scene_filepath )
 
     raytracer->LoadScene( scene_filepath );
 
-    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, {sceneCornerX,sceneCornerY}, sceneDistance ) );
+    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, sceneCornerX, sceneCornerY, sceneDistance ) );
 
     std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
 
@@ -111,7 +111,7 @@ void RenderSimulation()
 
     DisplayLensletShow renderer( &display );
     renderer.LoadScene( displayImageFilepath );
-    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, {sceneCornerX,sceneCornerY}, sceneDistance ) );
+    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, sceneCornerX, sceneCornerY, sceneDistance ) );
     std::shared_ptr<SampleGenerator> sampler( new SampleGenUniform(3) );
 
     SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );

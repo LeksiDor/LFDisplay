@@ -29,7 +29,7 @@ lfrt::RayGenerator* DisplayLensletShow::CreateDefaultRayGenerator( const Int& wi
 	{
 		const Real dist = DisplayModel->LensletToOrigin + DisplayModel->LensletToLCD;
 		const Vec2 size = DisplayModel->SizeLCD;
-		return new RayGenPinhole( width, height, { 0.5*size[0], 0.5*size[1] }, dist );
+		return new RayGenPinhole( width, height, 0.5*size[0], 0.5*size[1], dist );
 	}
 }
 

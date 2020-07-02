@@ -16,6 +16,7 @@ using ss = std::stringstream;
 
 
 DisplayLensletShow::DisplayLensletShow( const DisplayProjectorAligned* displayModel )
+	:DisplayModel(displayModel)
 {
 }
 
@@ -47,7 +48,7 @@ lfrt::RayGenerator* DisplayLensletShow::CreateDefaultRayGenerator( const Int& wi
 	{
 		const Vec2 halfSize = DisplayModel->HalfPhysSize;
 		const Real dist = DisplayModel->ViewerDistance;
-		return new RayGenPinhole( width, height, { halfSize[0], halfSize[1] }, dist );
+		return new RayGenPinhole( width, height, halfSize[0], halfSize[1], dist );
 	}
 }
 
