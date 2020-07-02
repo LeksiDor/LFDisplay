@@ -1,7 +1,8 @@
 #include "DisplayProjectorsCapture.h"
 
-DisplayProjectorsCapture::DisplayProjectorsCapture( const DisplayProjectorAligned* model )
+DisplayProjectorsCapture::DisplayProjectorsCapture( const DisplayProjectorAligned* model, const Vec3& projectorPos )
 	:DisplayModel(model)
+	,ProjectorPosition(projectorPos)
 {
 }
 

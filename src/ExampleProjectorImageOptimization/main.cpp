@@ -1,6 +1,48 @@
 #include <iostream>
 
+#include <cstdlib>
+
+#include "LFRayTracerPBRT.h"
+
+#include "SampleAccumCV.h"
+#include "SampleGenUniform.h"
+
 #include "DisplayProjectorAligned.h"
+#include "DisplayProjectorsCapture.h"
+
+
+DisplayProjectorAligned display;
+std::vector<Vec3> projectorPositions;
+Int width = 0;
+Int height = 0;
+
+
+using namespace lfrt;
+using ss = std::stringstream;
+
+
+void RenderProjectorImage( const Vec3& position, const std::string& scene_filepath, const std::string& image_filepath )
+{
+    LFRayTracer* raytracer = LFRayTracerPBRTInstance();
+
+    raytracer->LoadScene( scene_filepath );
+
+    DisplayProjectorsCapture* displayRaygen = new DisplayProjectorsCapture( &display, position );
+    std::shared_ptr<const RayGenerator> raygen( displayRaygen );
+
+    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
+
+    SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
+    std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+
+    raytracer->Render( *raygen, *sampleGen, *sampleAccum );
+
+    cv::Mat result;
+    sampleAccumCV->SaveToImage( result );
+
+    cv::imwrite( image_filepath, result );
+}
+
 
 
 int main( int argc, char** argv )
@@ -18,13 +60,23 @@ int main( int argc, char** argv )
 
     std::cout << "Scene model: " << argv[1] << std::endl;
 
-
-    DisplayProjectorAligned display;
     if ( !display.Load( "../../data/display-projectors-aligned.yaml" ) )
     {
         std::cout << "Cannot load display model." << std::endl;
         return 1;
     }
+    width  = display.ProjectorResolution[0];
+    height = display.ProjectorResolution[1];
+    display.FillProjectorsPositions( projectorPositions );
+
+    std::system( "mkdir ProjectorImages" );
+    for ( Int i = 0; i < projectorPositions.size(); ++i )
+    {
+        const std::string image_filepath = (ss() << "ProjectorImages" << "/" << std::setfill('0') << std::setw(4) << i << ".exr").str();
+        RenderProjectorImage( projectorPositions[i], argv[1], image_filepath );
+    }
+
+    LFRayTRacerPBRTRelease();
 
     return 0;
 }

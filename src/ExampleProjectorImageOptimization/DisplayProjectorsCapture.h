@@ -15,7 +15,10 @@ public:
 
 public:
 
-    DisplayProjectorsCapture( const DisplayProjectorAligned* model = nullptr );
+    DisplayProjectorsCapture(
+        const DisplayProjectorAligned* model = nullptr,
+        const Vec3& projectorPos = Vec3(0,0,0)
+        );
 
     virtual ~DisplayProjectorsCapture() = default;
 
