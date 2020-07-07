@@ -2,9 +2,11 @@
 #define DISPLAYPROJECTORSCAPTURE_H
 
 #include "BaseTypes.h"
-#include "DisplayProjectorAligned.h"
+//#include "DisplayProjectorAligned.h"
 #include "LFRayTracer.h"
 
+class DiffuserModel;
+class DisplayProjectorAligned;
 
 class DisplayProjectorsCapture
     : public lfrt::RayGenerator
@@ -15,10 +17,7 @@ public:
 
 public:
 
-    DisplayProjectorsCapture(
-        const DisplayProjectorAligned* model = nullptr,
-        const Vec3& projectorPos = Vec3(0,0,0)
-        );
+    DisplayProjectorsCapture( const DisplayProjectorAligned* model, const Vec3& projectorPos );
 
     virtual ~DisplayProjectorsCapture() = default;
 
@@ -29,9 +28,10 @@ public:
         VEC3& ori, VEC3& dir ) const override;
 
 
-public:
-    const DisplayProjectorAligned* DisplayModel = nullptr;
-    Vec3 ProjectorPosition = Vec3(0,0,0);
+private:
+    const DisplayProjectorAligned* m_DisplayModel = nullptr;
+    Vec3 m_ProjectorPosition = Vec3(0,0,0);
+    std::shared_ptr<DiffuserModel> m_DiffuserModel = nullptr;
 };
 
 
