@@ -6,7 +6,9 @@
 
 #include <opencv2/opencv.hpp>
 
+class DiffuserModel;
 class DisplayProjectorAligned;
+
 
 class DisplayProjectorsShow
 	: public lfrt::LFRayTracer
@@ -15,7 +17,7 @@ public:
 
 	using Color = cv::Vec3f;
 
-	DisplayProjectorsShow( const DisplayProjectorAligned* displayModel = nullptr );
+	DisplayProjectorsShow( const DisplayProjectorAligned* displayModel );
 
 	virtual ~DisplayProjectorsShow() = default;
 
@@ -34,17 +36,13 @@ public:
 
 	virtual bool Render( const lfrt::RayGenerator& raygen, const lfrt::SampleGenerator& sampleGen, lfrt::SampleAccumulator& sampleAccum ) const override;
 
-
-private:
-	static Real RhoConical( const Real& dx, const Real& dy, const Real& dz );
-	static Real EtaConical( const Real& dx, const Real& dy, const Real& dz );
-	static Real RhoLinear( const Real& dx, const Real& dy, const Real& dz );
-	static Real EtaLinear( const Real& dx, const Real& dy, const Real& dz );
-
 public:
-	const DisplayProjectorAligned* DisplayModel = nullptr;
 	std::vector<cv::Mat> ProjectorImages;
 	std::vector<Vec3> ProjectorPositions;
+
+private:
+	const DisplayProjectorAligned* m_DisplayModel = nullptr;
+	std::shared_ptr<DiffuserModel> m_DiffuserModel = nullptr;
 };
 
 

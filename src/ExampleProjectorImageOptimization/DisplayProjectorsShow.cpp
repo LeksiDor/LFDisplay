@@ -1,6 +1,8 @@
 #include "DisplayProjectorsShow.h"
 
+#include "DiffuserModel.h"
 #include "DisplayProjectorAligned.h"
+
 #include "RayGenPinhole.h"
 #include "SampleAccumCV.h"
 #include "SampleGenUniform.h"
@@ -16,16 +18,17 @@ using ss = std::stringstream;
 
 
 DisplayProjectorsShow::DisplayProjectorsShow( const DisplayProjectorAligned* displayModel )
-	:DisplayModel(displayModel)
+	:m_DisplayModel(displayModel)
 {
+	m_DiffuserModel.reset( DiffuserModel::Create(*displayModel) );
 }
 
 
 bool DisplayProjectorsShow::LoadScene( const std::string& filepath )
 {
-	if (DisplayModel == nullptr)
+	if (m_DisplayModel == nullptr)
 		return false;
-	DisplayModel->FillProjectorsPositions(ProjectorPositions);
+	m_DisplayModel->FillProjectorsPositions(ProjectorPositions);
 	const Int numProjectorsTotal = ProjectorPositions.size();
 	ProjectorImages.resize(numProjectorsTotal);
 	bool success = true;
@@ -40,14 +43,14 @@ bool DisplayProjectorsShow::LoadScene( const std::string& filepath )
 
 lfrt::RayGenerator* DisplayProjectorsShow::CreateDefaultRayGenerator( const Int& width, const Int& height ) const
 {
-	if ( DisplayModel == nullptr )
+	if ( m_DisplayModel == nullptr )
 	{
 		return new RayGenPinhole( width, height );
 	}
 	else
 	{
-		const Vec2 halfSize = DisplayModel->HalfPhysSize;
-		const Real dist = DisplayModel->ViewerDistance;
+		const Vec2 halfSize = m_DisplayModel->HalfPhysSize;
+		const Real dist = m_DisplayModel->ViewerDistance;
 		return new RayGenPinhole( width, height, halfSize[0], halfSize[1], dist );
 	}
 }
@@ -69,11 +72,11 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 {
 	// ToDo: display with front-projectors.
 
-	if ( DisplayModel == nullptr )
+	if ( m_DisplayModel == nullptr )
 		return false;
 
-	const Int width  = DisplayModel->ProjectorResolution[0];
-	const Int height = DisplayModel->ProjectorResolution[1];
+	const Int width  = m_DisplayModel->ProjectorResolution[0];
+	const Int height = m_DisplayModel->ProjectorResolution[1];
 
 	if ( width <= 0 || height <= 0 )
 		return false;
@@ -106,26 +109,11 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 	const Int numTilesY = (globSizeY + tileSize - 1) / tileSize;
 
 	const Int numProjectorsTotal = ProjectorPositions.size();
-	const Real viewerDistance = DisplayModel->ViewerDistance;
-	const Real halfSizeX = DisplayModel->HalfPhysSize[0];
-	const Real halfSizeY = DisplayModel->HalfPhysSize[1];
-	const Real diffusionRho = DisplayModel->DiffusionPower[0];
-	const Real diffusionEta = DisplayModel->DiffusionPower[1];
-
-	std::function<Real(const Real&,const Real&,const Real&)> RhoFunc;
-	std::function<Real(const Real&,const Real&,const Real&)> EtaFunc;
-	switch ( DisplayModel->DiffuserType )
-	{
-	case DisplayProjectorAligned::Diffuser::Conical:
-		RhoFunc = RhoConical;
-		EtaFunc = EtaConical;
-		break;
-	case DisplayProjectorAligned::Diffuser::Linear:
-	default:
-		RhoFunc = RhoLinear;
-		EtaFunc = EtaLinear;
-		break;
-	}
+	const Real viewerDistance = m_DisplayModel->ViewerDistance;
+	const Real halfSizeX = m_DisplayModel->HalfPhysSize[0];
+	const Real halfSizeY = m_DisplayModel->HalfPhysSize[1];
+	const Real diffusionRho = m_DisplayModel->DiffusionPower[0];
+	const Real diffusionEta = m_DisplayModel->DiffusionPower[1];
 
 	cv::parallel_for_( cv::Range( 0, numTilesX*numTilesY ),
 		[&]( const cv::Range& range )
@@ -180,10 +168,6 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 							const Real x0 = ori.x + (z0 - ori.z) * dir.x / dir.z;
 							const Real y0 = ori.y + (z0 - ori.z) * dir.y / dir.z;
 
-							// Find (rho,eta) for viewer ray.
-							const Real rhoViewer = RhoFunc( dir.x, dir.y, dir.z );
-							const Real etaViewer = EtaFunc( dir.x, dir.y, dir.z );
-
 							const Real texLambdaX = 0.5 * (1.0 + x0/halfSizeX);
 							const Real texLambdaY = 0.5 * (1.0 - y0/halfSizeY);
 
@@ -200,20 +184,7 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 							for ( Int projInd = 0; projInd < numProjectorsTotal; ++projInd )
 							{
 								const Vec3 projPos = ProjectorPositions[projInd];
-								const Real dx = projPos[0] - x0;
-								const Real dy = projPos[1] - y0;
-								const Real dz = projPos[2] - z0;
-								// Find (rho,eta) for projector ray.
-								const Real rhoProj = RhoFunc( dx, dy, dz );
-								const Real etaProj = EtaFunc( dx, dy, dz );
-
-								const Real rhoDiff = rhoProj - rhoViewer;
-								const Real etaDiff = etaProj - etaViewer;
-
-								const Real weightRho = std::exp( -diffusionRho*rhoDiff*rhoDiff );
-								const Real weightEta = std::exp( -diffusionEta*etaDiff*etaDiff );
-								const Real weight = weightRho * weightEta;
-
+								const Real weight = m_DiffuserModel->RefractedIntensity( projPos, Vec3(x0,y0,z0), Vec3(ori.x,ori.y,ori.z) );
 								if ( weight >= 0.00001 )
 								{
 									const Color projColor = ProjectorImages[projInd].at<Color>(yProj,xProj);
@@ -248,28 +219,4 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 	);
 
 	return true;
-}
-
-
-Real DisplayProjectorsShow::RhoConical( const Real& dx, const Real& dy, const Real& dz )
-{
-	return dx / std::sqrt(dy*dy + dz*dz);
-}
-
-
-Real DisplayProjectorsShow::EtaConical(const Real& dx, const Real& dy, const Real& dz)
-{
-	return dy / dz;
-}
-
-
-Real DisplayProjectorsShow::RhoLinear(const Real& dx, const Real& dy, const Real& dz)
-{
-	return dx / dz;
-}
-
-
-Real DisplayProjectorsShow::EtaLinear(const Real& dx, const Real& dy, const Real& dz)
-{
-	return dy / dz;
 }
