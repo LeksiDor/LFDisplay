@@ -102,7 +102,7 @@ int main( int argc, char** argv )
         raytracer->LoadScene( argv[1] );
         for ( Int i = 0; i < projectorPositions.size(); ++i )
         {
-            const Vec3 pos = observerSpace.Position(i);
+            const Vec3 pos = projectorPositions[i];
             const std::string image_filepath = (ss() << "ProjectorImages_0000" << "/" << std::setfill('0') << std::setw(4) << i << ".exr").str();
             raygen.reset( new DisplayProjectorsCapture( &display, pos ) );
             raytracer->Render( *raygen, *sampleGen, *sampleAccum );
