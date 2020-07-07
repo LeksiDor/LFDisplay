@@ -26,8 +26,19 @@ If you learned about this project from one of my papers, you can go to [Publishe
 This project was created and maintained on Windows 10 machine, but potentially can be easily transfered to another platform.
 
 It has the following dependencies:<br>
-+ <a href="https://opencv.org/">OpenCV</a> (tested 4.3) &mdash; mandatory.
-+ <a href="https://github.com/LeksiDor/LFRayTracerPBRT/">LFRayTracerPBRT</a> &mdash; optional, but highly recommended.
++ [OpenCV](https://opencv.org/) (tested 4.3) &mdash; mandatory.
++ [LFRayTracerPBRT](https://github.com/LeksiDor/LFRayTracerPBRT/) &mdash; mandatory (for now).
+
+You should build the project as follows.<br>
+1. Make sure you have OpenCV build, preferably 4.3. If not, [download](https://opencv.org/) it.
+2. Clone this project to some folder on your machine. E.g., in `D:/Work/` call `git clone https://github.com/LeksiDor/LFDisplay.git`.
+3. Clone LFRayTracerPBRT to the same folder. E.g., in `D:/Work/` call `git clone --recursive https://github.com/LeksiDor/LFRayTracerPBRT.git`.
+4. Build LFRayTracerPBRT. For detailed instructions, go to its [project page](https://github.com/LeksiDor/LFRayTracerPBRT/). Shortly, you should execute a regular CMake build, while choosing build folder as, e.g., `D:/Work/LFRayTracerPBRT/build`. Don't forget to check `PBRT_FLOAT_AS_DOUBLE` flag. Then, compile in both Debug and Release.
+5. Call `Initialize3rdparty.sh` script from `D:/Work/LFDisplay/` folder. This script will instantiate the `3rdparty` folder, which contains all necessary things from LFRayTracerPBRT.
+6. Build this project using CMake. Choose build folder as `D:/Work/LFDisplay/build`.
+7. Compile this project. If you have errors, it's not ok.
+
+
 
 
 ## <a name="Papers"></a> Published papers
