@@ -108,7 +108,7 @@ bool DisplayProjectorsOptimization::Iterate(
 					const Color gtColor = groundtrue[viewInd].at<Color>(y,x);
 					// Evaluate weights.
 					Real sumWeights = 0;
-					w = cv::Mat( numProjectors, 1, RealType );
+					w = cv::Mat::zeros( numProjectors, 1, RealType );
 					for ( Int projInd = 0; projInd < numProjectors; ++projInd )
 					{
 						const Vec3 projPos = projectorPositions[projInd];
@@ -132,8 +132,8 @@ bool DisplayProjectorsOptimization::Iterate(
 					for ( Int i = 0; i < numProjectors; ++i )
 					{
 						const Real weight = w.at<Real>(i,0);
-						for ( Int i = 0; i < 3; ++i )
-							betas[i].at<Real>(i,0) += weight * gtColor[i];
+						for ( Int c = 0; c < 3; ++c )
+							betas[c].at<Real>(i,0) += weight * gtColor[c];
 						for ( Int j = 0; j < numProjectors; ++j )
 						{
 							const Real weight_j = w.at<Real>(j,0);
@@ -143,7 +143,7 @@ bool DisplayProjectorsOptimization::Iterate(
 				}
 				// Normalize B and beta.
 				B /= Real(numViewerPositions);
-				for ( Int i = 0; i < 3; betas[i++] /= Real(numViewerPositions) );
+				for ( Int c = 0; c < 3; betas[c++] /= Real(numViewerPositions) );
 
 				// Iterate.
 				for ( Int iterInd = 0; iterInd < numIterations; ++iterInd )
@@ -154,7 +154,6 @@ bool DisplayProjectorsOptimization::Iterate(
 					{
 						// Initialize variables.
 						const cv::Mat& beta = betas[channelInd];
-						//cv::Mat& beta = { beta0, beta1, beta2 }[channelInd];
 						for ( Int projInd = 0; projInd < numProjectors; ++projInd )
 							prev.at<Real>(projInd,0) = prevIterImage[projInd].at<Color>(y,x)[channelInd];
 						// Calculate gradient: gradient = B*R - beta.
@@ -163,7 +162,10 @@ bool DisplayProjectorsOptimization::Iterate(
 						for ( Int i = 0; i < numProjectors; ++i )
 						{
 							Real prev_val = prev.at<Real>(i,0);
-							Real descent_val = gradient.at<Real>(i,0) / B.at<Real>(i,i);
+							Real descent_val = 0;
+							const Real B_diagval = B.at<Real>(i,i);
+							if ( B_diagval > 0.00001 )
+								descent_val = gradient.at<Real>(i,0) / B_diagval;
 							if ( descent_val < 0 && prev_val >= 1 ) descent_val = 0;
 							if ( descent_val > 0 && prev_val <= 0 ) descent_val = 0;
 							descent.at<Real>(i,0) = descent_val;
@@ -171,12 +173,16 @@ bool DisplayProjectorsOptimization::Iterate(
 						// Calculate optimal step value: lambda = (descent.gradient)/(descent.B.descent).
 						const Real lambda_nom = descent.dot( gradient );
 						const Real lambda_denom = descent.dot( B * descent );
-						const Real lambda = lambda_nom / lambda_denom;
+						const Real lambda = (lambda_denom > 0.000001) ? lambda_nom / lambda_denom : 0;
 						// Calculate new iteration value.
 						cur = prev - lambda * descent;
 						// Store result to the image.
 						for ( Int i = 0; i < numProjectors; ++i )
-							curIterImage[i].at<Color>(y,x)[channelInd] = cur.at<Real>(i,0);
+						{
+							Real cur_val = cur.at<Real>(i,0);
+							cur_val = std::min<Real>( std::max<Real>( cur_val, 0 ), 1 );
+							curIterImage[i].at<Color>(y,x)[channelInd] = cur_val;
+						}
 					}
 				}
 			}
