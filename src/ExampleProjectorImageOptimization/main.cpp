@@ -68,6 +68,7 @@ int main( int argc, char** argv )
     std::cout << "2 - generate projector images" << std::endl;
     std::cout << "3 - generate perceived images (requires step 2)" << std::endl;
     std::cout << "4 - generate iterative projector-perceived images (requires steps 1 and 2)" << std::endl;
+    std::cout << "5 - generate perceived images for all iterations (requires step 4)" << std::endl;
 
     Int choice = -1;
     std::cin >> choice;
@@ -175,6 +176,29 @@ int main( int argc, char** argv )
             {
                 const std::string image_filepath = (ss() << folder_name << "/" << std::setfill('0') << std::setw(4) << projInd << ".exr").str();
                 cv::imwrite( image_filepath, images[projInd] );
+            }
+        }
+        } break;
+    case 5: {
+        for ( Int iterInd = 0; iterInd < numIterations; ++iterInd )
+        {
+            const std::string folder_projectors = (ss() << "ProjectorImages_" << std::setfill('0') << std::setw(4) << (iterInd+1)).str();
+            const std::string folder_perceived = (ss() << "PerceivedImages_" << std::setfill('0') << std::setw(4) << (iterInd+1)).str();
+            std::system( ("mkdir " + folder_perceived).c_str() );
+            DisplayProjectorsShow show( &display );
+            if ( !show.LoadScene( folder_projectors ) )
+            {
+                std::cout << "Could not load projector images! Terminate!" << std::endl;
+                return 1;
+            }
+            for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
+            {
+                const Vec3 pos = observerSpace.Position( viewInd );
+                const std::string image_filepath = (ss() << folder_perceived << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
+                raygen.reset( new RayGenPinhole( width, height, -halfSizeX, -halfSizeY, halfSizeX, halfSizeY, display.ViewerDistance, pos[0], pos[1] ) );
+                show.Render( *raygen, *sampleGen, *sampleAccum );
+                sampleAccumCV->SaveToImage( result );
+                cv::imwrite( image_filepath, result );
             }
         }
         } break;
