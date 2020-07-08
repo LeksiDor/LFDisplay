@@ -4,11 +4,13 @@
 
 #include "LFRayTracerPBRT.h"
 
+#include "Image.h"
 #include "SampleAccumCV.h"
 #include "SampleGenUniform.h"
 
 #include "DisplayProjectorAligned.h"
 #include "DisplayProjectorsCapture.h"
+#include "DisplayProjectorsOptimization.h"
 #include "DisplayProjectorsShow.h"
 
 #include "RayGenPinhole.h"
@@ -55,6 +57,8 @@ int main( int argc, char** argv )
     width  = display.ProjectorResolution[0];
     height = display.ProjectorResolution[1];
     display.FillProjectorsPositions( projectorPositions );
+    const Int numProjectors = projectorPositions.size();
+    const Int numViewerPositions = observerSpace.NumPositions();
 
 
     std::cout << std::endl;
@@ -63,7 +67,7 @@ int main( int argc, char** argv )
     std::cout << "1 - generate ground-true images" << std::endl;
     std::cout << "2 - generate projector images" << std::endl;
     std::cout << "3 - generate perceived images (requires step 2)" << std::endl;
-    std::cout << "4 - generate iterative projector-perceived images (requires step 2)" << std::endl;
+    std::cout << "4 - generate iterative projector-perceived images (requires steps 1 and 2)" << std::endl;
 
     Int choice = -1;
     std::cin >> choice;
@@ -86,7 +90,7 @@ int main( int argc, char** argv )
         std::system( "mkdir GroundTrueImages" );
         LFRayTracer* raytracer = LFRayTracerPBRTInstance();
         raytracer->LoadScene( argv[1] );
-        for ( Int viewInd = 0; viewInd < observerSpace.NumPositions(); ++viewInd )
+        for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
         {
             const Vec3 pos = observerSpace.Position( viewInd );
             const std::string image_filepath = (ss() << "GroundTrueImages" << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
@@ -100,7 +104,7 @@ int main( int argc, char** argv )
         std::system( "mkdir ProjectorImages_0000" );
         LFRayTracer* raytracer = LFRayTracerPBRTInstance();
         raytracer->LoadScene( argv[1] );
-        for ( Int i = 0; i < projectorPositions.size(); ++i )
+        for ( Int i = 0; i < numProjectors; ++i )
         {
             const Vec3 pos = projectorPositions[i];
             const std::string image_filepath = (ss() << "ProjectorImages_0000" << "/" << std::setfill('0') << std::setw(4) << i << ".exr").str();
@@ -118,7 +122,7 @@ int main( int argc, char** argv )
             std::cout << "Could not load projector images! Terminate!" << std::endl;
             return 1;
         }
-        for ( Int viewInd = 0; viewInd < observerSpace.NumPositions(); ++viewInd )
+        for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
         {
             const Vec3 pos = observerSpace.Position( viewInd );
             const std::string image_filepath = (ss() << "PerceivedImages_0000" << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
@@ -129,7 +133,50 @@ int main( int argc, char** argv )
         }
         } break;
     case 4: {
-
+        std::vector<cv::Mat> zeroIteration( numProjectors );
+        std::vector<cv::Mat> groundtrue( numViewerPositions );
+        // Load ground-true and initial projector images.
+        for ( Int projInd = 0; projInd < numProjectors; ++projInd )
+        {
+            const std::string image_filepath = (ss() << "ProjectorImages_0000" << "/" << std::setfill('0') << std::setw(4) << projInd << ".exr").str();
+            const bool success = LoadImageRGB( image_filepath, zeroIteration[projInd] );
+            if ( !success )
+            {
+                std::cout << "Cannot load projector image: " << image_filepath << std::endl;
+                return 1;
+            }
+        }
+        for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
+        {
+            const std::string image_filepath = (ss() << "GroundTrueImages" << "/" << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
+            const bool success = LoadImageRGB( image_filepath, groundtrue[viewInd] );
+            if ( !success )
+            {
+                std::cout << "Cannot load ground-true image: " << image_filepath << std::endl;
+                return 1;
+            }
+        }
+        // Perform iterations.
+        std::vector< std::vector<cv::Mat> > iterations;
+        DisplayProjectorsOptimization optimization( &display, &observerSpace );
+        const bool success = optimization.Iterate( groundtrue, zeroIteration, iterations, numIterations );
+        if ( !success )
+        {
+            std::cout << "Cannot perform iterations!" << std::endl;
+            return 1;
+        }
+        // Save the result.
+        for ( Int iterInd = 0; iterInd < numIterations; ++iterInd )
+        {
+            const std::string folder_name = (ss() << "ProjectorImages_" << std::setfill('0') << std::setw(4) << (iterInd+1)).str();
+            std::system( ("mkdir " + folder_name).c_str() );
+            std::vector<cv::Mat>& images = iterations[iterInd];
+            for ( Int projInd = 0; projInd < numProjectors; ++projInd )
+            {
+                const std::string image_filepath = (ss() << folder_name << "/" << std::setfill('0') << std::setw(4) << projInd << ".exr").str();
+                cv::imwrite( image_filepath, images[projInd] );
+            }
+        }
         } break;
     default:
         std::cout << "Your choice is wrong!!! Terminate!" << std::endl;
