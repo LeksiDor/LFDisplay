@@ -44,11 +44,12 @@ You should build the project as follows.<br>
 ## <a name="Papers"></a> Published papers
 
 Oleksii Doronin, Erdem Sahin, Robert Bregovic, Atanas Gotchev<br>
-<em>A Framework for Assessing Rendering Techniques for Near-Eye Integral Imaging Displays.</em><br>
-To appear in ICIP 2020 proceedings.
-&mdash; See ExampleNearEyeInImRT sub-project.
+***A Framework for Assessing Rendering Techniques for Near-Eye Integral Imaging Displays.***<br>
+To appear in ICIP 2020 proceedings.<br>
+**Source code folder**: /src/ExampleNearEyeInImRT/ <br>
+**Source code Wiki**: [ExampleNearEyeInImRT](https://github.com/LeksiDor/LFDisplay/wiki/ExampleNearEyeInImRT)
 
 Oleksii Doronin, Robert Bregovic, Atanas Gotchev<br>
-<em>Optimized 3D Scene Rendering on Projection-Based 3D Displays.</em><br>
-&mdash; See ExampleProjectorOptimization sub-project.
-To appear in EUSIPCO 2020 proceedings.
+***Optimized 3D Scene Rendering on Projection-Based 3D Displays.***<br>
+To appear in EUSIPCO 2020 proceedings.<br>
+**Source code folder**: /src/ExampleProjectorImageOptimization/ <br>
