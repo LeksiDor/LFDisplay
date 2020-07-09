@@ -139,10 +139,10 @@ void CompareImages()
     LoadImageRGB( groundtrueImageFilepath, groundtrue );
     LoadImageRGB( simulatedImageFilepath, simulated );
 
-    const double psnr = ImagePSNR( simulated, groundtrue );
-    std::cout << "PSNR: " << psnr << std::endl;
+    const cv::Scalar psnr = ImageValuePSNR( simulated, groundtrue );
+    std::cout << "PSNR: " << psnr[0] << " " << psnr[1] << " " << psnr[2] << std::endl;
 
-    const cv::Scalar ssim = ImageMSSIM( simulated, groundtrue );
+    const cv::Scalar ssim = ImageValueMSSIM( simulated, groundtrue );
     std::cout << "SSIM: " << ssim[0] << " " << ssim[1] << " " << ssim[2] << std::endl;
 }
 
