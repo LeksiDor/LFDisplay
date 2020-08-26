@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <cstdlib>
+#include <fstream>
 
 #include "LFRayTracerPBRT.h"
 
@@ -31,6 +32,18 @@ using namespace lfrt;
 using ss = std::stringstream;
 
 
+bool StatisticsToFile( const std::vector<Vec3>& statistics, const std::string& filepath )
+{
+    std::fstream file( filepath , std::fstream::out );
+    if ( !file.is_open() )
+        return false;
+    for ( auto value = statistics.begin(); value != statistics.end(); ++value )
+    {
+        file << (*value)[0] << " " << (*value)[1] << " " << (*value)[2] << std::endl;
+    }
+    file.close();
+    return true;
+}
 
 
 int main( int argc, char** argv )
@@ -74,7 +87,7 @@ int main( int argc, char** argv )
     std::cin >> choice;
 
     Int numIterations = 0;
-    if ( choice == 4 || choice == 5 )
+    if ( choice == 4 || choice == 5 || choice == 6 )
     {
         std::cout << "Enter number of iterations: ";
         std::cin >> numIterations;
@@ -210,50 +223,52 @@ int main( int argc, char** argv )
         }
         } break;
     case 6: {
-        const Int iterInd = 0;
-        const std::string folder_perceived = (ss() << "PerceivedImages_" << std::setfill('0') << std::setw(4) << iterInd).str();
-        const std::string folder_gt = "GroundTrueImages";
-        cv::Mat image_perceived;
-        cv::Mat image_gt;
+        std::vector<Vec3>  mse_values( numIterations+1, Vec3(0,0,0) );
+        std::vector<Vec3> psnr_values( numIterations+1, Vec3(0,0,0) );
+        std::vector<Vec3> ssim_values( numIterations+1, Vec3(0,0,0) );
         bool success = true;
-        Vec3 mse_sum = Vec3(0,0,0);
-        Vec3 psnr_sum = Vec3(0,0,0);
-        Vec3 ssim_sum = Vec3(0,0,0);
-        std::cout << std::endl;
-        for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
+        for ( Int iterInd = 0; iterInd <= numIterations; ++iterInd )
         {
-            const std::string local_filename = (ss() << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
-            const bool is_loaded_perceived = LoadImageRGB( folder_perceived + "/" + local_filename, image_perceived );
-            const bool is_loaded_gt = LoadImageRGB( folder_gt + "/" + local_filename, image_gt );
-            if ( !is_loaded_perceived || !is_loaded_gt )
+            const std::string folder_perceived = (ss() << "PerceivedImages_" << std::setfill('0') << std::setw(4) << iterInd).str();
+            const std::string folder_gt = "GroundTrueImages";
+            cv::Mat image_perceived;
+            cv::Mat image_gt;
+            Vec3 mse_sum = Vec3(0,0,0);
+            Vec3 psnr_sum = Vec3(0,0,0);
+            Vec3 ssim_sum = Vec3(0,0,0);
+            std::cout << std::endl;
+            for ( Int viewInd = 0; viewInd < numViewerPositions; ++viewInd )
             {
-                success = false;
+                const std::string local_filename = (ss() << std::setfill('0') << std::setw(4) << viewInd << ".exr").str();
+                const bool is_loaded_perceived = LoadImageRGB( folder_perceived + "/" + local_filename, image_perceived );
+                const bool is_loaded_gt = LoadImageRGB( folder_gt + "/" + local_filename, image_gt );
+                if ( !is_loaded_perceived || !is_loaded_gt )
+                {
+                    success = false;
+                    break;
+                }
+                const cv::Scalar mse = ImageValueMSE( image_perceived, image_gt );
+                const cv::Scalar psnr = ImageValuePSNR( image_perceived, image_gt );
+                const cv::Scalar ssim = ImageValueMSSIM( image_perceived, image_gt );
+                mse_sum  += Vec3(  mse[0],  mse[1],  mse[2] );
+                psnr_sum += Vec3( psnr[0], psnr[1], psnr[2] );
+                ssim_sum += Vec3( ssim[0], ssim[1], ssim[2] );
+            }
+            if ( !success )
+            {
+                std::cout << "Cannot perform operation!!! Terminate!" << std::endl;
                 break;
             }
-            const cv::Scalar mse = ImageValueMSE( image_perceived, image_gt );
-            const cv::Scalar psnr = ImageValuePSNR( image_perceived, image_gt );
-            const cv::Scalar ssim = ImageValueMSSIM( image_perceived, image_gt );
-            mse_sum  += Vec3(  mse[0],  mse[1],  mse[2] );
-            psnr_sum += Vec3( psnr[0], psnr[1], psnr[2] );
-            ssim_sum += Vec3( ssim[0], ssim[1], ssim[2] );
+            mse_values[iterInd]  =  mse_sum / numViewerPositions;
+            psnr_values[iterInd] = psnr_sum / numViewerPositions;
+            ssim_values[iterInd] = ssim_sum / numViewerPositions;
         }
-        if ( !success )
+        if ( success )
         {
-            std::cout << "Cannot perform operation!!! Terminate!" << std::endl;
-            break;
+            StatisticsToFile(  mse_values,  "mse.txt" );
+            StatisticsToFile( psnr_values, "psnr.txt" );
+            StatisticsToFile( ssim_values, "ssim.txt" );
         }
-
-        const Vec3  mse_average =  mse_sum / numViewerPositions;
-        const Vec3 psnr_average = psnr_sum / numViewerPositions;
-        const Vec3 ssim_average = ssim_sum / numViewerPositions;
-
-        std::cout << std::endl << std::endl;
-        std::cout << "Average values:" << std::endl;
-        std::cout <<  "MSE: " <<  mse_average[0] << "\t" <<  mse_average[1] << "\t" <<  mse_average[2] << std::endl;
-        std::cout << "PSNR: " << psnr_average[0] << "\t" << psnr_average[1] << "\t" << psnr_average[2] << std::endl;
-        std::cout << "SSIM: " << ssim_average[0] << "\t" << ssim_average[1] << "\t" << ssim_average[2] << std::endl;
-        std::cout << std::endl;
-
     } break;
     default:
         std::cout << "Your choice is wrong!!! Terminate!" << std::endl;
