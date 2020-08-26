@@ -25,8 +25,6 @@ Int height = 0;
 
 const ObserverSpace observerSpace( { Vec3(-500,0,0), Vec3(10,0,0), 101 } );
 
-const Int numIterations = 100;
-
 
 using namespace lfrt;
 using ss = std::stringstream;
@@ -72,6 +70,13 @@ int main( int argc, char** argv )
 
     Int choice = -1;
     std::cin >> choice;
+
+    Int numIterations = 0;
+    if ( choice == 4 || choice == 5 )
+    {
+        std::cout << "Enter number of iterations: ";
+        std::cin >> numIterations;
+    }
 
     // Rendering helper classes.
     std::shared_ptr<const RayGenerator> raygen = nullptr;
