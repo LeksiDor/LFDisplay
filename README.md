@@ -46,10 +46,10 @@ You should build the project as follows.<br>
 Oleksii Doronin, Erdem Sahin, Robert Bregovic, Atanas Gotchev<br>
 ***A Framework for Assessing Rendering Techniques for Near-Eye Integral Imaging Displays.***<br>
 To appear in ICIP 2020 proceedings.<br>
-**Source code folder**: /src/ExampleNearEyeInImRT/ <br>
-**Source code Wiki**: [ExampleNearEyeInImRT](https://github.com/LeksiDor/LFDisplay/wiki/ExampleNearEyeInImRT)
+**Source code folder**: /src/ExampleICIP2020/ <br>
+**Source code Wiki**: [ExampleICIP2020](https://github.com/LeksiDor/LFDisplay/wiki/ExampleICIP2020)
 
 Oleksii Doronin, Robert Bregovic, Atanas Gotchev<br>
 ***Optimized 3D Scene Rendering on Projection-Based 3D Displays.***<br>
 To appear in EUSIPCO 2020 proceedings.<br>
-**Source code folder**: /src/ExampleProjectorImageOptimization/ <br>
+**Source code folder**: /src/ExampleEUSIPCO2020/ <br>
