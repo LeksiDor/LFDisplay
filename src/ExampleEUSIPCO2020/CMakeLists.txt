@@ -1,4 +1,4 @@
-set ( TARGET_NAME ExampleProjectorImageOptimization )
+set ( TARGET_NAME ExampleEUSIPCO2020 )
 
 file ( GLOB SOURCE_FILES "*.cpp" )
 file ( GLOB HEADER_FILES "*.h" )

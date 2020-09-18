@@ -1,4 +1,4 @@
-set ( TARGET_NAME ExampleNearEyeInImRT )
+set ( TARGET_NAME ExampleICIP2020 )
 
 file ( GLOB SOURCE_FILES "*.cpp" )
 file ( GLOB HEADER_FILES "*.h" )
