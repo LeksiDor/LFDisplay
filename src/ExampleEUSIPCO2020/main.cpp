@@ -19,13 +19,15 @@
 #include "ObserverSpace.h"
 
 
-DisplayProjectorAligned display;
-std::vector<Vec3> projectorPositions;
-Int width = 0;
-Int height = 0;
-
-
 const ObserverSpace observerSpace( { Vec3(-500,0,0), Vec3(10,0,0), 101 } );
+
+// Display model parameters.
+const Real ViewerDistance = 400;
+const Vec2i ProjectorResolution = Vec2i(800,600);
+const Vec2 HalfPhysSize = Vec2(200,150);
+const DisplayProjectorAligned::ProjectorLine ProjectorLine({ Vec3(-1000,0,800), Vec3(50,0,0), 41 });
+const DisplayProjectorAligned::Diffuser DiffuserType = DisplayProjectorAligned::Diffuser::Linear;
+const Vec2 DiffusionPower = Vec2(40,0);
 
 
 using namespace lfrt;
@@ -61,13 +63,18 @@ int main( int argc, char** argv )
 
     std::cout << "Scene model: " << argv[1] << std::endl;
 
-    if ( !display.Load( "../../data/display-projectors-aligned.yaml" ) )
-    {
-        std::cout << "Cannot load display model." << std::endl;
-        return 1;
-    }
-    width  = display.ProjectorResolution[0];
-    height = display.ProjectorResolution[1];
+    // Initialize display model.
+    DisplayProjectorAligned display;
+    display.ViewerDistance = ViewerDistance;
+    display.ProjectorResolution = ProjectorResolution;
+    display.HalfPhysSize = HalfPhysSize;
+    display.ProjectorLines.push_back( ProjectorLine );
+    display.DiffuserType = DiffuserType;
+    display.DiffusionPower = DiffusionPower;
+
+    const Int width  = display.ProjectorResolution[0];
+    const Int height = display.ProjectorResolution[1];
+    std::vector<Vec3> projectorPositions;
     display.FillProjectorsPositions( projectorPositions );
     const Int numProjectors = projectorPositions.size();
     const Int numViewerPositions = observerSpace.NumPositions();
@@ -79,7 +86,7 @@ int main( int argc, char** argv )
     std::cout << "1 - generate ground-true images" << std::endl;
     std::cout << "2 - generate projector images" << std::endl;
     std::cout << "3 - generate perceived images (requires step 2)" << std::endl;
-    std::cout << "4 - generate iterative projector-perceived images (requires steps 1 and 2)" << std::endl;
+    std::cout << "4 - generate iterative projector images (requires steps 1 and 2)" << std::endl;
     std::cout << "5 - generate perceived images for all iterations (requires step 4)" << std::endl;
     std::cout << "6 - compute MSE, PSNR and SSIM for all iterations (requires step 1 and 5)" << std::endl;
 
