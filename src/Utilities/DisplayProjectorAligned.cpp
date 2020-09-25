@@ -75,10 +75,7 @@ void DisplayProjectorAligned::FillProjectorsPositions( std::vector<Vec3>& positi
 {
 	positions.clear();
 	const Int numLines = ProjectorLines.size();
-	Int numProjectorsTotal = 0;
-	for ( Int i = 0; i < numLines; ++i )
-		numProjectorsTotal += ProjectorLines[i].number;
-
+	const Int numProjectorsTotal = NumberOfProjectors();
 	positions.resize( numProjectorsTotal );
 	Int globalProjectorInd = 0;
 	for ( Int lineInd = 0; lineInd < numLines; ++lineInd )
@@ -90,4 +87,14 @@ void DisplayProjectorAligned::FillProjectorsPositions( std::vector<Vec3>& positi
 			positions[globalProjectorInd++] = position;
 		}
 	}
+}
+
+
+Int DisplayProjectorAligned::NumberOfProjectors() const
+{
+	const Int numLines = ProjectorLines.size();
+	Int numProjectorsTotal = 0;
+	for ( Int i = 0; i < numLines; ++i )
+		numProjectorsTotal += ProjectorLines[i].number;
+	return numProjectorsTotal;
 }

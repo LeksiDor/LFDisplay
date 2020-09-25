@@ -36,6 +36,8 @@ public:
 
 	void FillProjectorsPositions( std::vector<Vec3>& positions ) const;
 
+	Int NumberOfProjectors() const; // Total number of projectors in the system.
+
 public:
 	Real ViewerDistance = Real(1); // Physical distance from viewer to the screen center.
 	Vec2i ProjectorResolution = Vec2i(1,1); // Resolution of each individual projector.
