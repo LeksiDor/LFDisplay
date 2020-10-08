@@ -14,5 +14,7 @@ cv::Scalar MSE_to_PSNR( const cv::Scalar& mse );
 cv::Scalar ImageValueMSSIM( const cv::Mat& I1, const cv::Mat& I2);
 
 
+bool ClampImages( std::vector<cv::Mat>& images );
+
 
 #endif // UTILITIES_IMAGEANALYSIS_H

@@ -1,4 +1,5 @@
 #include "ImageAnalysis.h"
+#include "Parallel.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -75,4 +76,36 @@ cv::Scalar ImageValueMSSIM( const cv::Mat& i1, const cv::Mat& i2)
     cv::divide(t3, t1, ssim_map);        // ssim_map =  t3./t1;
     cv::Scalar mssim = cv::mean(ssim_map);   // mssim = average of ssim map
     return mssim;
+}
+
+
+
+bool ClampImages( std::vector<cv::Mat>& images )
+{
+    const Int numImages = images.size();
+    if ( numImages <= 0 )
+        return false;
+    const Int width = images[0].cols;
+    const Int height = images[0].rows;
+    if ( width <= 0 || height <= 0 )
+        return false;
+    for ( Int imageInd = 0; imageInd < numImages; ++imageInd )
+    {
+        if ( images[0].cols != width || images[0].rows != height )
+            return false;
+    } 
+    CVParallel2D( width, height, [&](Int x, Int y)
+        {
+            for ( Int imageInd = 0; imageInd < numImages; ++imageInd )
+            {
+                cv::Vec3f& val = images[imageInd].at<cv::Vec3f>(y,x);
+                val = cv::Vec3f(
+                    std::min<float>( std::max<float>( val(0), 0 ), 1 ),
+                    std::min<float>( std::max<float>( val(1), 0 ), 1 ),
+                    std::min<float>( std::max<float>( val(2), 0 ), 1 )
+                );
+            }
+        }
+    );
+    return true;
 }
