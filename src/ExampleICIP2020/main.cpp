@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 #include "LFRayTracerPBRT.h"
 
@@ -35,113 +36,99 @@ const Real sceneDistance = 300;
 DisplayLenslet display;
 
 
-void RenderGroundTrue( const std::string& scene_filepath )
+struct TestCase
+{
+    std::string Name;
+    DisplayLensletCapture::Sampling SamplingType;
+    Int NumSamples;
+};
+
+const std::string output_folder = "output";
+const Int NumPerceivedSamples = 5;
+
+
+// Provided ray tracer must contain already-loaded scene.
+void RenderGroundTruth( const LFRayTracer* raytracer, cv::Mat& gtimage )
 {
 
     std::cout << "Ground-true image render started." << std::endl;
-
-    LFRayTracer* raytracer = LFRayTracerPBRTInstance();
-
-    raytracer->LoadScene( scene_filepath );
-
     std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, sceneCornerX, sceneCornerY, sceneDistance ) );
-
-    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(3) );
-
+    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform( NumPerceivedSamples ) );
     SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
     std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
-
     raytracer->Render( *raygen, *sampleGen, *sampleAccum );
-
-    cv::Mat result;
-    sampleAccumCV->SaveToImage( result );
-
+    sampleAccumCV->SaveToImage( gtimage );
     std::cout << "Ground-true image render ended." << std::endl;
-
-    cv::imwrite( groundtrueImageFilepath, result );
-    cv::namedWindow( "Ground True", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Ground True", result );
-
 }
 
 
-
-void RenderDisplayImage( const std::string& scene_filepath )
+// Provided ray tracer must contain already-loaded scene.
+void RunTestCase( const TestCase& testCase, const LFRayTracer* raytracer, const cv::Mat& gtimage )
 {
+    // Define case-related images images.
+    cv::Mat displayimage;
+    cv::Mat perceivedimage;
+
+    // Create case-related folder.
+    const std::string casedir = output_folder + "/" + testCase.Name;
+    if ( !std::filesystem::exists( casedir ) )
+    {
+        if ( !std::filesystem::create_directory( casedir ) )
+        {
+            std::cout << "Error: Cannot create directory: " << casedir << std::endl;
+            return;
+        }
+    }
+
+    // Render display image.
     std::cout << "Display image render started." << std::endl;
-
-    LFRayTracer* raytracer = LFRayTracerPBRTInstance();
-
-    raytracer->LoadScene( scene_filepath );
-
-    const Int width = display.ResolutionLCD[0];
-    const Int height = display.ResolutionLCD[1];
-
-    DisplayLensletCapture* displayRaygen = new DisplayLensletCapture( &display );
-    std::shared_ptr<const RayGenerator> raygen( displayRaygen );
-
-    std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(1) );
-
-    SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
-    std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
-
-    raytracer->Render( *raygen, *sampleGen, *sampleAccum );
-
-    cv::Mat result;
-    sampleAccumCV->SaveToImage( result );
-
+    {
+        const Int width = display.ResolutionLCD[0];
+        const Int height = display.ResolutionLCD[1];
+        DisplayLensletCapture* displayRaygen = new DisplayLensletCapture( &display, testCase.SamplingType );
+        std::shared_ptr<const RayGenerator> raygen( displayRaygen );
+        std::shared_ptr<SampleGenerator> sampleGen( new SampleGenUniform(testCase.NumSamples) );
+        SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
+        std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+        raytracer->Render( *raygen, *sampleGen, *sampleAccum );
+        sampleAccumCV->SaveToImage( displayimage );
+    }
     std::cout << "Display image render ended." << std::endl;
+    cv::imwrite( casedir+"/displayimage.exr", displayimage );
 
-    cv::imwrite( displayImageFilepath, result );
-    cv::namedWindow( "Display Image", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Display Image", result );
-}
-
-
-void RenderSimulation()
-{
+    // Render perceived image.
     std::cout << "Display simulation started." << std::endl;
-
-    const Int numLensletsX = std::round( display.SizeLCD[0] / display.LensletOrientation()(0,0) );
-    const Int numLensletsY = std::round( display.SizeLCD[1] / display.LensletOrientation()(1,1) );
-
-    DisplayLensletShow renderer( &display );
-    renderer.LoadScene( displayImageFilepath );
-    std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, sceneCornerX, sceneCornerY, sceneDistance ) );
-    std::shared_ptr<SampleGenerator> sampler( new SampleGenUniform(3) );
-
-    SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
-    std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
-
-    renderer.Render( *raygen, *sampler, *sampleAccum );
-
-    cv::Mat result;
-    sampleAccumCV->SaveToImage( result );
-
+    {
+        const Int numLensletsX = std::round( display.SizeLCD[0] / display.LensletOrientation()(0,0) );
+        const Int numLensletsY = std::round( display.SizeLCD[1] / display.LensletOrientation()(1,1) );
+        DisplayLensletShow renderer( &display );
+        renderer.DisplayImage = displayimage;
+        std::shared_ptr<const RayGenerator> raygen( new RayGenPinhole( width, height, sceneCornerX, sceneCornerY, sceneDistance ) );
+        std::shared_ptr<SampleGenerator> sampler( new SampleGenUniform( NumPerceivedSamples ) );
+        SampleAccumCV* sampleAccumCV = new SampleAccumCV( width, height );
+        std::shared_ptr<SampleAccumulator> sampleAccum( sampleAccumCV );
+        renderer.Render( *raygen, *sampler, *sampleAccum );
+        sampleAccumCV->SaveToImage( perceivedimage );
+    }
     std::cout << "Display simulation ended." << std::endl;
+    cv::imwrite( casedir+"/simulated.exr", perceivedimage );
 
-    cv::imwrite( simulatedImageFilepath, result );
-    cv::namedWindow( "Simulation", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Simulation", result );
-}
-
-
-
-void CompareImages()
-{
-    cv::Mat groundtrue;
-    cv::Mat simulated;
-
-    LoadImageRGB( groundtrueImageFilepath, groundtrue );
-    LoadImageRGB( simulatedImageFilepath, simulated );
-
-    const cv::Scalar psnr = ImageValuePSNR( simulated, groundtrue );
+    // Compare perceived image vs ground truth.
+    const cv::Scalar psnr = ImageValuePSNR( perceivedimage, gtimage );
     std::cout << "PSNR: " << psnr[0] << " " << psnr[1] << " " << psnr[2] << std::endl;
-
-    const cv::Scalar ssim = ImageValueMSSIM( simulated, groundtrue );
+    const cv::Scalar ssim = ImageValueMSSIM( perceivedimage, gtimage );
     std::cout << "SSIM: " << ssim[0] << " " << ssim[1] << " " << ssim[2] << std::endl;
+    // Write statistics to file.
+    std::fstream file( casedir+"/statistics.txt" , std::fstream::out );
+    if ( !file.is_open() )
+    {
+        std::cout << "Error: Cannot create text file to write statistics." << std::endl;
+        return;
+    }
+    file << "PSNR: " << psnr[0] << " " << psnr[1] << " " << psnr[2] << std::endl;
+    file << "MS-SSIM: " << ssim[0] << " " << ssim[1] << " " << ssim[2] << std::endl;
+    file.close();
 }
-
 
 
 int main(int argc, char** argv)
@@ -169,26 +156,45 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if ( !std::filesystem::exists( "output" ) )
+    if ( !std::filesystem::exists( output_folder ) )
     {
-        if ( !std::filesystem::create_directory( "output" ) )
+        if ( !std::filesystem::create_directory( output_folder ) )
         {
             std::cout << "Error: Cannot create folder 'output'." << std::endl;
             return 1;
         }
     }
 
-    RenderGroundTrue( scenepath );
+    // Define test cases parameters.
+    const std::vector<TestCase> testCases({
+        TestCase({ "LC", DisplayLensletCapture::Sampling::LensletCenter, 1 }),
+        TestCase({ "PC", DisplayLensletCapture::Sampling::PupilCenter, 1 }),
+        TestCase({ "LA", DisplayLensletCapture::Sampling::LensletAverage, 5 })
+        }
+    );
 
-    RenderDisplayImage( scenepath );
+    LFRayTracer* raytracer = LFRayTracerPBRTInstance();
+    if ( raytracer == nullptr )
+    {
+        std::cout << "Error: Cannot initialize ray tracer." << std::endl;
+        return 1;
+    }
+    if ( !raytracer->LoadScene( scenepath ) )
+    {
+        std::cout << "Error: Cannot load scene." << std::endl;
+        return 1;
+    }
 
-    RenderSimulation();
+    cv::Mat gt_image;
+    RenderGroundTruth( raytracer, gt_image );
+    cv::imwrite( output_folder+"/gt.exr", gt_image );
+
+    for ( auto caseiter = testCases.begin(); caseiter != testCases.end(); ++caseiter )
+    {
+        RunTestCase( *caseiter, raytracer, gt_image );
+    }
 
     LFRayTRacerPBRTRelease();
-
-    CompareImages();
-
-    cv::waitKey(0);
 
     return 0;
 }
