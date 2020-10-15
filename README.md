@@ -53,3 +53,4 @@ Oleksii Doronin, Robert Bregovic, Atanas Gotchev<br>
 ***Optimized 3D Scene Rendering on Projection-Based 3D Displays.***<br>
 To appear in EUSIPCO 2020 proceedings.<br>
 **Source code folder**: /src/ExampleEUSIPCO2020/ <br>
+**Release**: [Windows_x64](https://github.com/LeksiDor/LFDisplay/releases/tag/EUSIPCO2020)
