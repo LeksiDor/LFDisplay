@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 
 #include "LFRayTracerPBRT.h"
 
@@ -17,14 +18,9 @@
 using namespace lfrt;
 
 
-// ToDo: Realistic camera model (eye that can focus).
-// ToDo: Metrics consistent with published results.
-// ToDo: Test all cases.
-
-
-const std::string groundtrueImageFilepath = "../groundtrue.exr";
-const std::string displayImageFilepath = "../displayimage.exr";
-const std::string simulatedImageFilepath = "../simulated.exr";
+const std::string groundtrueImageFilepath = "output/groundtrue.exr";
+const std::string displayImageFilepath = "output/displayimage.exr";
+const std::string simulatedImageFilepath = "output/simulated.exr";
 
 // Width and height of the images to compare.
 const Int width = 512;
@@ -150,27 +146,41 @@ void CompareImages()
 
 int main(int argc, char** argv)
 {
-	std::cout << "Hello world" << std::endl;
-    std::cout << "ExampleLenslet" << std::endl;
-    std::cout << "Usage: 1 mandatory argument: path to scene model." << std::endl;
+    std::cout << "Example ICIP-2020" << std::endl;
+    std::cout << "List of needed arguments:" << std::endl;
+    std::cout << "1) Path to pbrt-v3 scene model." << std::endl;
+    std::cout << "2) Path to lenslet-based display model." << std::endl;
+    std::cout << "Once executed, program will create foder 'output' and fill it." << std::endl;
     std::cout << std::endl;
 
-    if ( argc != 2 )
+    if ( argc != 3 )
     {
-        std::cout << "You must provide 1 argument: path to scene model." << std::endl;
+        std::cout << "Error: Number of provided arguments is not correct." << std::endl;
         return 1;
     }
 
-	const bool isDisplayLoaded = display.Load( "../../data/lensletdisplay.yaml" );
+    const std::string scenepath = argv[1];
+    const std::string displaypath = argv[2];
+
+	const bool isDisplayLoaded = display.Load( displaypath );
     if ( !isDisplayLoaded )
     {
         std::cout << "Display model is not loaded." << std::endl;
         return 1;
     }
 
-    RenderGroundTrue( argv[1] );
+    if ( !std::filesystem::exists( "output" ) )
+    {
+        if ( !std::filesystem::create_directory( "output" ) )
+        {
+            std::cout << "Error: Cannot create folder 'output'." << std::endl;
+            return 1;
+        }
+    }
 
-    RenderDisplayImage( argv[1] );
+    RenderGroundTrue( scenepath );
+
+    RenderDisplayImage( scenepath );
 
     RenderSimulation();
 
