@@ -13,7 +13,7 @@ SampleGenUniform::SampleGenUniform( const Int primaryRes, const Int secondaryRes
 
 SampleGenerator* SampleGenUniform::Clone() const
 {
-    return new SampleGenUniform( primaryRes );
+    return new SampleGenUniform( primaryRes, secondaryRes );
 }
 
 
