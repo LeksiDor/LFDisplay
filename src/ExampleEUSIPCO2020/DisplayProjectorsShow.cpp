@@ -1,6 +1,7 @@
 #include "DisplayProjectorsShow.h"
 
 #include "DiffuserModel.h"
+#include "DiffuserTanBased.h"
 #include "DisplayProjectorAligned.h"
 
 #include "RayGenPinhole.h"
@@ -20,7 +21,9 @@ using ss = std::stringstream;
 DisplayProjectorsShow::DisplayProjectorsShow( const DisplayProjectorAligned* displayModel )
 	:m_DisplayModel(displayModel)
 {
-	m_DiffuserModel.reset( DiffuserModel::Create(*displayModel) );
+	auto diffuser = new DiffuserTanBased();
+	diffuser->DiffusionPower = displayModel->DiffusionPower;
+	m_DiffuserModel.reset( diffuser );
 }
 
 
@@ -184,7 +187,9 @@ bool DisplayProjectorsShow::Render( const lfrt::RayGenerator& raygen, const lfrt
 							for ( Int projInd = 0; projInd < numProjectorsTotal; ++projInd )
 							{
 								const Vec3 projPos = ProjectorPositions[projInd];
-								const Real weight = m_DiffuserModel->RefractedIntensity( projPos, Vec3(x0,y0,z0), Vec3(ori.x,ori.y,ori.z) );
+								const Vec3 dirToProj = projPos - Vec3(x0,y0,z0);
+								const Vec3 dirToEye  = Vec3( ori.x - x0, ori.y - y0, ori.z - z0 );
+								const Real weight = m_DiffuserModel->Diffusion( dirToProj, dirToEye );
 								if ( weight >= 0.00001 )
 								{
 									const Color projColor = ProjectorImages[projInd].at<Color>(yProj,xProj);

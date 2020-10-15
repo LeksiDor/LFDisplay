@@ -1,6 +1,7 @@
 #include "DisplayProjectorsOptimization.h"
 
 #include "DiffuserModel.h"
+#include "DiffuserTanBased.h"
 #include "DisplayProjectorAligned.h"
 #include "ObserverSpace.h"
 
@@ -9,7 +10,9 @@ DisplayProjectorsOptimization::DisplayProjectorsOptimization( const DisplayProje
 	:m_DisplayModel(displayModel)
 	,m_ObserverSpace(viewerSpace)
 {
-	m_DiffuserModel.reset( DiffuserModel::Create(*displayModel) );
+	auto diffuser = new DiffuserTanBased();
+	diffuser->DiffusionPower = displayModel->DiffusionPower;
+	m_DiffuserModel.reset( diffuser );
 }
 
 
@@ -112,7 +115,9 @@ bool DisplayProjectorsOptimization::Iterate(
 					for ( Int projInd = 0; projInd < numProjectors; ++projInd )
 					{
 						const Vec3 projPos = projectorPositions[projInd];
-						const Real weight = m_DiffuserModel->RefractedIntensity( projPos, Vec3(x0,y0,z0), viewPos );
+						const Vec3 dirToProj = projPos - Vec3(x0,y0,z0);
+						const Vec3 dirToEye  = viewPos - Vec3(x0,y0,z0);
+						const Real weight = m_DiffuserModel->Diffusion( dirToProj, dirToEye );
 						if ( weight > 0.00001 )
 						{
 							sumWeights += weight;

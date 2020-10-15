@@ -1,27 +1,27 @@
-#ifndef DIFFUSERMODEL_H
-#define DIFFUSERMODEL_H
+#ifndef UTILITIES_DIFFUSERMODEL_H
+#define UTILITIES_DIFFUSERMODEL_H
 
 #include "BaseTypes.h"
 
-class DisplayProjectorAligned;
 
-
+// Abstract class for diffuser model.
+// Does not consider the geometrical shape of provided diffuser.
+// All calculations are done in local diffuser coordinates,
+// where point (0,0,0) corresponds to the ray intersection point,
+// diffuser axis of anisotropy is (1,0,0),
+// and diffuser normal is (0,0,1).
 class DiffuserModel
 {
 public:
 	virtual ~DiffuserModel() = default;
 
-	// Viewer line is parameterized as (x,0,0).
-	// Return value: X such that (X,0,0) gives the maximum intensity for the specified ray.
-	virtual Real FindMaxOnViewerLine( const Vec3& rayOrigin, const Vec3& intersection ) const = 0;
+	// Line is parameterized as linePos = lineOri + lambda*lineDir.
+	// Returns parameter 'lambda' which corresponds to the maximal refracted ray intensity.
+	virtual Real FindMaxOnLine( const Vec3& rayOri, const Vec3& lineOri, const Vec3& lineDir = Vec3(1,0,0) ) const = 0;
 
-	// Returns intensity multiplier for the ray with specified origin,
-	// screen intersection point, and final destination.
-	virtual Real RefractedIntensity( const Vec3& rayOrigin, const Vec3& intersection, const Vec3& destination ) const = 0;
-
-public:
-	static DiffuserModel* Create( const DisplayProjectorAligned& displayModel );
+	// Returns intensity of refracted light ray which starts at 'pointA' and terminates at 'pointB'.
+	virtual Real Diffusion( const Vec3& pointA, const Vec3& pointB ) const = 0;
 };
 
 
-#endif // DIFFUSERMODEL_H
+#endif // UTILITIES_DIFFUSERMODEL_H

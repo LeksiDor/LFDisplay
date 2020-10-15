@@ -1,6 +1,7 @@
 #include "DisplayProjectorsCapture.h"
 
 #include "DiffuserModel.h"
+#include "DiffuserTanBased.h"
 #include "DisplayProjectorAligned.h"
 
 
@@ -9,7 +10,9 @@ DisplayProjectorsCapture::DisplayProjectorsCapture( const DisplayProjectorAligne
 	:m_DisplayModel(model)
 	,m_ProjectorPosition(projectorPos)
 {
-	m_DiffuserModel.reset( DiffuserModel::Create(*model) );
+	auto diffuser = new DiffuserTanBased();
+	diffuser->DiffusionPower = model->DiffusionPower;
+	m_DiffuserModel.reset( diffuser );
 }
 
 
@@ -27,7 +30,9 @@ Real DisplayProjectorsCapture::GenerateRay( const VEC2& raster, const VEC2& seco
 	const Real z0 = m_DisplayModel->ViewerDistance;
 
 	// Viewer position on the observer line.
-	const Real X = m_DiffuserModel->FindMaxOnViewerLine( m_ProjectorPosition, Vec3(x0,y0,z0) );
+	const Vec3 locOri = m_ProjectorPosition - Vec3(x0,y0,z0);
+	const Vec3 locLineOri = Vec3(0,0,0) - Vec3(x0,y0,z0);
+	const Real X = m_DiffuserModel->FindMaxOnLine( locOri, locLineOri );
 
 	ori.x = X;
 	ori.y = 0;
