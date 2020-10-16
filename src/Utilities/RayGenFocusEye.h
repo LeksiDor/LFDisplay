@@ -9,6 +9,7 @@
 // Aperture center is (0,0,0).
 // Rays originate from aperture plane at z=0.
 // Rays corresponding to the same retina point intersect at z=InFocusPlaneZ.
+// If InFocusPlaneZ=0, then use pinhole camera model.
 // Ray direction is from origin towards point on the image plane.
 class RayGenFocusEye : public lfrt::RayGenerator
 {
@@ -27,7 +28,7 @@ public:
 		VEC3& ori, VEC3& dir ) const override;
 
 	Real RetinaPlaneZ = -1.0;
-	Real InFocusPlaneZ = 1.0;
+	Real InFocusPlaneZ = 0.0;
 	VEC2 RetinaStart = VEC2({ -1.0, -1.0 });
 	VEC2 RetinaEnd   = VEC2({  1.0,  1.0 });
 	Real ApertureRadius = 1.0;
